@@ -1,4 +1,14 @@
-
+---
+title:  "markdown 표기 샘플"
+excerpt: "markdown 표기 샘플 입니다."
+toc: true #heading 리스트 사이즈 바
+toc_sticky: true #heading 리스트 사이즈 바 유지
+categories:
+  - etc
+tags:
+  - etc
+  - markdown
+---
 
 ## 제목(Heading)
 
@@ -150,11 +160,11 @@ select * from dual;
 ```
 MarkDown 에 사용되는 기호 표시
 \문자를 앞에 사용하면 MarkDown 에 사용되는 기호 표시 가능
-# Headr1
-\# Headr1
+# Header1
+\# Header1
 ```
-# Headr1
-\# Headr1
+# Header1
+\# Header1
 
 ***************************
 
@@ -168,6 +178,8 @@ MarkDown 에 사용되는 기호 표시
 11111  
 22222
 33333<br>44444
+
+***************************
 
 ```
 `문자열에 블럭으로 감싸기`
