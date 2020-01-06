@@ -4,19 +4,19 @@ excerpt: "Vertica 기본 소개"
 toc: true #heading 리스트 사이즈 바
 toc_sticky: true #heading 리스트 사이즈 바 유지
 categories:
-  - vertica_learn
+  - vertica_architecture
 tags:
   - vertica
   - 버티카
 ---
 
 # Vertica 소개
-세계적인 데이터베이스 석학인 Michael Stonebraker 교수가 대용량 분석을 위한 DBMS 프로젝트인 C-Store 연구의 결과물로 2006년에 처음 시장에 출시되었다.  
+세계적인 데이터베이스 석학인 Michael Stonebraker 교수가 대용량 분석을 위한 DBMS 프로젝트인 [C-Store 연구의 결과물](http://db.csail.mit.edu/projects/cstore/vldb.pdf){:target="_blank"}로 2006년에 처음 시장에 출시되었다.  
 기존 Row기반의 DB로는 앞으로 쏟아질 방대한 데이터량을 처리하는 것에 한계를 인식하고 column기반의 완전히 새로 만들어진 데이터베이스 엔진이다.  
-[C-Store 논문](http://db.csail.mit.edu/projects/cstore/vldb.pdf)
+
 
 ## C-Store 연구 결과물인 Vertica 데이터베이스 엔진의 4대 기술 요소
-![vertica 데이터베이스 엔진 4대 기술 요소 이미지](/assets/img/vertica_learn_001_01.png)
+![vertica 데이터베이스 엔진 4대 기술 요소 이미지](/assets/img/vertica_architecture_001_01.png)
 
 **Massively Parallel Processing(MPP)**  
 별도에 마스터 노드 필요 없이 모든 노드에서 병렬로 쿼리 실행.  
@@ -34,12 +34,12 @@ Projection이라는 최적화된 형식과 구조로 데이터를 저장하여 �
 
 ## 다양한 인프라 환경 지원  
 리눅스 기반에 온프레미스, 클라우드, 가상화, HDFS 환경에서 분석 엔진으로 Vertica를 사용할수 있다.  
-![다양한 인프라 환경 지원 이미지](/assets/img/vertica_learn_001_02.png)  
+![다양한 인프라 환경 지원 이미지](/assets/img/vertica_architecture_001_02.png)  
 
 
 ## compute와 storage layer 분리(C/S분리) 가능한 아키텍처  
 Vertica는 compute와 storage layer 분리(C/S분리) 여부에 따라 Enterprise mode, Eon mode로 구분되어 지며, 하나에 데이터베이스 엔진으로 각 mode를 구성한다.  
-![C/S분리 아키텍처 이미지](/assets/img/vertica_learn_001_03.png)  
+![C/S분리 아키텍처 이미지](/assets/img/vertica_architecture_001_03.png)  
 
 **Enterprise mode**
 컴퓨팅 엔진과 스토리지가 결합되어 예측 가능한 워크로드를 원하는 기대 시간 내에 빠르게 처리하기 위한 아키텍처  

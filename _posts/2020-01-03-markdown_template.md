@@ -102,10 +102,11 @@ select * from dual;
 
 ```
 [링크제목](주소)
-[Google](https://google.com)
+[Google](https://google.com)  
+[Google](https://google.com){:target="_blank"} 새창에서
 ```
-[Google](https://google.com)
-
+[Google](https://google.com)  
+[Google](https://google.com){:target="_blank"}  
 
 ## 강조
 ```

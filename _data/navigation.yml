@@ -1,7 +1,7 @@
 # main links
 main:
-  - title: "Vertica Learn"
-    url: /categories/vertica_learn/
+  - title: "Vertica Architecture"
+    url: /categories/vertica_architecture/
   - title: "Vertica Use"
     url: /categories/vertica_use/
   - title: "Etc"
