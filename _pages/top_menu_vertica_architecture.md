@@ -1,7 +1,7 @@
 ---
 title: "Posts by vertica architecture"
 permalink: /categories/vertica_architecture/
-layout: single #category
+layout: category #single
 author_profile: true
 taxonomy: vertica_architecture
 ---
