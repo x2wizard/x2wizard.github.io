@@ -16,7 +16,7 @@ tags:
 
 
 ## C-Store 연구 결과물인 Vertica 데이터베이스 엔진의 4대 기술 요소
-![vertica 데이터베이스 엔진 4대 기술 요소 이미지](../img/vertica_architecture_001_01.png)
+![vertica 데이터베이스 엔진 4대 기술 요소 이미지](../img/vertica_architecture_1000_01.png)
 
 **Massively Parallel Processing(MPP)**  
 별도에 마스터 노드 필요 없이 모든 노드에서 병렬로 쿼리 실행.  
@@ -34,12 +34,12 @@ Projection이라는 최적화된 형식과 구조로 데이터를 저장하여 �
 
 ## 다양한 인프라 환경 지원  
 리눅스 기반에 온프레미스, 클라우드, 가상화, HDFS 환경에서 분석 엔진으로 Vertica를 사용할수 있다.  
-![다양한 인프라 환경 지원 이미지](../img/vertica_architecture_001_02.png)  
+![다양한 인프라 환경 지원 이미지](../img/vertica_architecture_1000_02.png)  
 
 
 ## compute와 storage layer 분리(C/S분리) 가능한 아키텍처  
 Vertica는 compute와 storage layer 분리(C/S분리) 여부에 따라 Enterprise mode, Eon mode로 구분되어 지며, 하나에 데이터베이스 엔진으로 각 mode를 구성한다.  
-![C/S분리 아키텍처 이미지](../img/vertica_architecture_001_03.png)  
+![C/S분리 아키텍처 이미지](../img/vertica_architecture_1000_03.png)  
 
 **Enterprise mode**
 컴퓨팅 엔진과 스토리지가 결합되어 예측 가능한 워크로드를 원하는 기대 시간 내에 빠르게 처리하기 위한 아키텍처  
