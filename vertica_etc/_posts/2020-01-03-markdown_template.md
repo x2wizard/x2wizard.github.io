@@ -4,9 +4,8 @@ excerpt: "markdown 표기 샘플 입니다."
 toc: true #heading 리스트 사이즈 바
 toc_sticky: true #heading 리스트 사이즈 바 유지
 categories:
-  - etc
+  - vertica_etc
 tags:
-  - etc
   - markdown
 ---
 
