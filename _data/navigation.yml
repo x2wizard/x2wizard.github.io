@@ -1,11 +1,17 @@
 # main links
 main:
+#  - title: "Vertica Architecture"
+#    url: /categories/vertica_architecture/
+#  - title: "Vertica Use"
+#    url: /categories/vertica_use/
+#  - title: "Etc"
+#    url: /categories/etc/
   - title: "Vertica Architecture"
-    url: /categories/vertica_architecture/
+    url: /vertica_architecture/
   - title: "Vertica Use"
-    url: /categories/vertica_use/
+    url: /vertica_use/
   - title: "Etc"
-    url: /categories/etc/
+    url: /vertica_etc/
   # - title: "Sample Posts"
   #   url: /year-archive/
   # - title: "Sample Collections"
