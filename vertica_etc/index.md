@@ -1,7 +1,7 @@
 ---
 title: "Posts by etc"
 #permalink: /categories/etc/
-layout: category
+layout: single #category
 author_profile: true
 taxonomy: vertica_etc
 ---

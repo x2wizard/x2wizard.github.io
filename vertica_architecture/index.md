@@ -1,6 +1,6 @@
 ---
 title: "Posts by vertica architecture"
-layout: category #single 
+layout: single #category
 author_profile: true
 taxonomy: vertica_architecture
 ---
