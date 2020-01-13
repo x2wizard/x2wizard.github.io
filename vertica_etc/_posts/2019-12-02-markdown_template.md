@@ -9,6 +9,17 @@ tags:
   - markdown
 ---
 
+<script type="application/javascript">
+function getIP(json){
+    //dataLayer.push({"event":"ipEvent","clientIP":json.ip});
+  clientIP = json.ip;
+
+}
+</script>
+
+<script type="application/javascript" src="https://api.ipify.org?format=jsonp&callback=getIP"></script>
+
+
 ## 제목(Heading)
 
 # #Heading1
@@ -185,3 +196,5 @@ MarkDown 에 사용되는 기호 표시
 `문자열에 블럭으로 감싸기`
 ```
 `문자열에 블럭으로 감싸기`
+
+

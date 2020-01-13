@@ -1,6 +1,6 @@
 ---
 title: "Posts by vertica use"
-layout: category
+layout: single #category
 author_profile: true
 taxonomy: vertica_use
 ---
