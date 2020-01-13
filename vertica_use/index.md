@@ -10,4 +10,5 @@ taxonomy: vertica_use
 기본 사용법 - Vertica 기본적인 사용 방법 등  
 
 
-**[Vertica 소개](/vertica_architecture/Vertica_architecture_001/)**  
+**[vertica.com 소개](/vertica_use/Vertica_use_1000/)**  
+**[vertica 접속하기](/vertica_use/Vertica_use_1010/)**  
