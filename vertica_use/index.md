@@ -9,6 +9,7 @@ taxonomy: vertica_use
 설치 - 도입 순서, 초기 설정, 동작 확인, 주의점, 그 외.  
 기본 사용법 - Vertica 기본적인 사용 방법 등  
 
-
-**[vertica.com 소개](/vertica_use/Vertica_use_1000/)**  
-**[vertica 접속하기](/vertica_use/Vertica_use_1010/)**  
+> 
+> **[vertica.com 소개](/vertica_use/Vertica_use_1000/)**  
+> 
+> **[vertica 접속하기](/vertica_use/Vertica_use_1010/)**  
