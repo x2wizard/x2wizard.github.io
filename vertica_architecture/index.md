@@ -16,4 +16,16 @@ Vertica architecture에 대한 정보
 > **[table과 projection object 계층 구조](/vertica_architecture/Vertica_architecture_1030/)**  
 > 
 > **[데이터 적재](/vertica_architecture/Vertica_architecture_1040/)**  
+> 
+> **[Query Execution Workflow](/vertica_architecture/Vertica_architecture_1050/)**  
+> 
+> **[Epoch](/vertica_architecture/Vertica_architecture_1060/)**  
+> 
+> **[Partitioning Tables](/vertica_architecture/Vertica_architecture_1070/)**  
+> 
+
+
+
+
+
 

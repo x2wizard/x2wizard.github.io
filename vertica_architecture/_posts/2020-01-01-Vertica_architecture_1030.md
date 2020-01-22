@@ -1,5 +1,5 @@
 ---
-title:  "Vertica table과 projection object 계층 구조"
+title:  "table과 projection object 계층 구조"
 excerpt: "Vertica table과 projection object 계층 구조"
 toc: true 
 toc_sticky: true 
@@ -33,13 +33,15 @@ tags:
 
 
 ## Table object
-Vertica는 논리적인 개념으로 table을 제공한다.  
+버티카는 논리적인 개념으로 table을 제공한다.  
 테이블에 대해 쿼리가 실행되면 Vertica는 쿼리를 최적으로 실행하는 projection을 선택한다.  
 ![Vertica table object](../img/vertica_architecture_1030_02.png)
 
 
 ## table 및 projection 관련 system table
-table과 projection관련 system table들에 대한 설명 및 계층구조를 이미지를 통해 확인 할 수 있다.  
+table과 projection 관련 system table들에 대한 설명 및 계층구조를 이미지를 통해 확인 할 수 있다.  
+
+![Vertica 시스템 테이블의 projection 계층](../img/vertica_architecture_1030_03.png)
 
 |system table       |설명|
 |:-----------------:|:-----------------|
@@ -49,7 +51,7 @@ table과 projection관련 system table들에 대한 설명 및 계층구조를 �
 |PROJECTION_STORAGE | 각 projection에 저장되는 데이터의 양을 알려준다. 하나의 projection에 어떤 데이터가 저장되어 있는지 정확히 알려주지 않는다는 점에 유의하십시오.|
 |STORAGE_CONTAINERS | STORAGE_CONTAINERS - projection이 어떤 ROS컨테이너에 어떻게 저장되어 있는지 알려준다.|
 
-![Vertica 시스템 테이블의 projection 계층](../img/vertica_architecture_1030_03.png)
+
 
 
 

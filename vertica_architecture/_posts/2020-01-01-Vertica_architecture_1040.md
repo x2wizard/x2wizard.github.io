@@ -1,5 +1,5 @@
 ---
-title:  "Vertica 데이터 적재"
+title:  "데이터 적재"
 excerpt: "Vertica 데이터 적재"
 toc: true 
 toc_sticky: true 
@@ -20,10 +20,10 @@ tags:
 ## Vertica Hybrid Storage
 버티카는 일반적인 DW 업무의 쿼리 수행과 함께 대량에 데이터 적재 및 쿼리 수행을 지원하기 위해 아래와 같은 WOS/ROS라는 스토리지 모델을 가지고 있다.  
 
-**WOS(Write Optimized Store)**
+**WOS(Write Optimized Store)**  
 WOS는 메모리 상주하는 데이터 저장소다. 일시적으로 메모리에 데이터를 저장하면 적재 프로세스가 빨라지고 디스크의 조각화(ROS 컨테이너)가 감소한다. 물론 데이터는 쿼리에 사용할 수 있다. 소량의 데이터를 지속적으로 적재하는 조직의 경우, 데이터를 먼저 메모리에 적재하는 것이 디스크에 쓰는 것보다 더 빠르며, 데이터에 빠르게 액세스할 수 있다.  
   
-**ROS(Read-Optimized Store)**
+**ROS(Read-Optimized Store)**  
 ROS는 디스크에 상주하는 데이터 저장소다. 대량에 데이터를 적재할 때 WOS를 사용하는것 보다 ROS에 직접 적재하면 훨씬 속도가 빠르다.  
   
 ![Vertica WOS_ROS구조](../img/vertica_architecture_1040_01.png)

@@ -34,18 +34,6 @@ projection에는 실제 데이터가 저장되므로 무분별한 projection 사
 ![프로젝션 유형](../img/vertica_architecture_1020_02.png)
 
 ## projection 생성 DDL
-**Column list and encodings**  
-projection에 포함될 컬럼 리스트 및 해당 컬럼을 인코딩 방법 지정. 컬럼 순서는 anchor table의 순서와 동일하지 않아도 된다. 인코딩 방법을 지정하지 않으면 vertica는 데이터 유형에 따라 데이터를 압축하는 AUTO인코딩 방법을 사용한다.  
-**Base query**  
-anchor table에서 select 하는데 사용되는 쿼리이다.  
-**Sort order**  
-데이터 저장시 정렬될 컬럼의 목록을 order by 문으로 지정한다.  
-**Segmentation clause**  
-projection의 데이터를 분산하거나 복제할지 여부 및 분산 키를 지정한다.  
-분산(segmentation) - SEGMENTED BY hash( columns )  
-복제(replication) - UNSEGMENTED  
-**K-safety**  
-K-sagety문은 segmented projection일 경우 buddy projection(복제 프로젝션)을 생성하도록 한다.  
 
 ```sql
 -------------Column list and encodings--------------------
@@ -71,18 +59,30 @@ SEGMENTED BY hash (
 ----------------K-sagety----------------------------------
 ALL NODES KSAFE;
 ```
+**Column list and encodings**  
+projection에 포함될 컬럼 리스트 및 해당 컬럼을 인코딩 방법 지정. 컬럼 순서는 anchor table의 순서와 동일하지 않아도 된다. 인코딩 방법을 지정하지 않으면 vertica는 데이터 유형에 따라 데이터를 압축하는 AUTO인코딩 방법을 사용한다.  
+**Base query**  
+anchor table에서 select 하는데 사용되는 쿼리이다.  
+**Sort order**  
+데이터 저장시 정렬될 컬럼의 목록을 order by 문으로 지정한다.  
+**Segmentation clause**  
+projection의 데이터를 분산하거나 복제할지 여부 및 분산 키를 지정한다.  
+분산(segmentation) - SEGMENTED BY hash( columns )  
+복제(replication) - UNSEGMENTED  
+**K-safety**  
+K-sagety문은 segmented projection일 경우 buddy projection(복제 프로젝션)을 생성하도록 한다.  
 
 
 ## Projection Replication(복제)
 Projection Replication이란 클러스터의 모든 노드들이 동일한 데이터 복사본을 가지고 있다는 것이다.  
-dimension과 같은 작은 projection에 쓰이며, join시 유용하다.  
+dimension 테이블과 같은 작은 테이블에 쓰이며, join시 유용하다.  
 각 노드에 데이터를 저장하므로 join이 로컬에서 일어나 조인 성능을 높일수 있다.  
 한 노드가 중단되더라도 다른 노드에 동일한 데이터가 존재하므로 서비스를 지속 할 수 있다.  
 ![Projection Replication(복제)](../img/vertica_architecture_1020_03.png)
 
 
 ## Projection Segmentation(분산)
-Projection Segmentation이란 fact와 같은 큰 projection에 대한 데이터를 클러스터 노드 전체에 고르게 분산시킨다. 이렇게 분산시키므로써 각 노드별로 데이터를 고르게 가지고 있으므로 쿼리 실행시 workload를 여러 노드로 분산 시킬 수 있다.  
+Projection Segmentation이란 fact 테이블과 같은 큰 테이블에 대한 데이터를 클러스터 노드 전체에 고르게 분산시킨다. 이렇게 분산시키므로써 각 노드별로 데이터를 고르게 가지고 있으므로 쿼리 실행시 workload를 여러 노드로 분산 시킬 수 있다.  
 ![Projection Segmentation(분산)](../img/vertica_architecture_1020_04.png)
 
 
