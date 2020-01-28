@@ -20,6 +20,14 @@ tags:
 버티카에서는 table을 anchor table이라고 부르기도 한다.  
 ![프로젝션 소개](../img/vertica_architecture_1020_01.png)
 
+## Projection이 만들어지는 시기
+버티카에서 Projection이 생성되는 시기는 아래와 같은 경우에 자동으로 혹은 명시적으로 생성 된다.  
+
++ 테이블 생성 후 처음으로 데이터가 저장될 때.(자동생성)  
++ 명시적으로 프로젝션을 생성할 때 (CREATE PROJECTION)  
++ 테이블을 생성할 때 프로젝션 속성을 함께 지정할 때 (예, Segment, Order, Ksafe 등)  
+
+
 ## 기본 Projection 유형
 
 |        projection 유형        |설명|

@@ -19,9 +19,11 @@ Vertica architecture에 대한 정보
 > 
 > **[Query Execution Workflow](/vertica_architecture/Vertica_architecture_1050/)**  
 > 
-> **[Epoch](/vertica_architecture/Vertica_architecture_1060/)**  
+> **[에포크(Epoch)](/vertica_architecture/Vertica_architecture_1060/)**  
 > 
 > **[Partitioning Tables](/vertica_architecture/Vertica_architecture_1070/)**  
+> 
+> **[데이터 삭제](/vertica_architecture/Vertica_architecture_1080/)**  
 > 
 
 
