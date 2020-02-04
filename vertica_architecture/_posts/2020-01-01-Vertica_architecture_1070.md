@@ -86,7 +86,7 @@ SELECT MOVE_PARTITIONS_TO_TABLE (
 ![Vertica Dropping partitions](../img/vertica_architecture_1070_06.png)
 
 ```sql
-SELECT DROP_PARTITION('table_name', 'partition_key');
+SELECT DROP_PARTITIONS('table_name', 'min_partition_key', 'max_partition_key');
 ```
 
 
