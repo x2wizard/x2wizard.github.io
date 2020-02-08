@@ -25,6 +25,12 @@ Vertica architecture에 대한 정보
 > 
 > **[데이터 삭제](/vertica_architecture/Vertica_architecture_1080/)**  
 > 
+> **[데이터베이스 사용자 및 권한](/vertica_architecture/Vertica_architecture_1090/)**  
+> 
+> **[테이블 접근 권한](/vertica_architecture/Vertica_architecture_1100/)**  
+> 
+> **[데이터베이스 사용자 및 권한](/vertica_architecture/Vertica_architecture_1110/)**  
+> 
 
 
 

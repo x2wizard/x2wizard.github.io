@@ -28,7 +28,7 @@ tags:
 **HA(High Availability)**  
 Multi-node cluster 구성(최소 3node)에서 데이터 복제본이 인접하고 있는 node에 저장되고 있으므로 특정 노드에 이상이 발생하여도 서비스는 지속 가능하다.  
 **MPP(Massively Parallel Processing)**  
-Vertica cluster에는 별도에 마스터 node가 존재하지 않는다.  
+버티카 cluster에는 별도에 마스터 node가 존재하지 않는다.  
 모든 node가 peer하며, 각 node들이 동시에 각자의 리소스 및 데이터가지고 처리하는 shared-nothing 아키텍처이다.  
 **Application Integration**  
 ETL/BI 솔루션과 쉽게 연동 가능하다.(표준 ODBC/JDBC 제공)  
@@ -49,8 +49,8 @@ Projection이라는 최적화된 형식과 구조로 데이터를 저장하여 �
 
 ## Vertica 아키텍처 특징
 ### Columnar Orientation  
-기존 row단위로 저장하는 데이터 베이스에서는 데이터가 table에 저장되지만, Vertica는 데이터가 column단위로 저장해서 관리하는 projection에 저장 된다.  
-쿼리를 수행하면 기존 row단위로 저장되는 데이터 베이스는 전체 컬럼을 읽어 들이나, Vertica는 필요한 컬럼만 읽어 들이기 때문에 디스크 I/O가 현저하게 감소하므로 쿼리 성능과 응답 속도를 훨씬 빠르게 할 수 있다.  
+기존 row단위로 저장하는 데이터 베이스에서는 데이터가 table에 저장되지만, 버티카는 데이터가 column단위로 저장해서 관리하는 projection에 저장 된다.  
+쿼리를 수행하면 기존 row단위로 저장되는 데이터 베이스는 전체 컬럼을 읽어 들이나, 버티카는 필요한 컬럼만 읽어 들이기 때문에 디스크 I/O가 현저하게 감소하므로 쿼리 성능과 응답 속도를 훨씬 빠르게 할 수 있다.  
 
 ```sql
 SELECT price 
@@ -60,7 +60,7 @@ SELECT price
 
 --TICKSTORE 테이블에서 symbol = 'BBY'이고 date = '06-May-2017'인 price 값을 읽어 오기 위해 
 --row단위 저장 데이터 베이스 전체 컬럼을 읽어 드려야 하나, 
---vertica는 필요한 컬럼인 symbol, date, price 컬럼만 읽어 드린다.  
+--버티카는 필요한 컬럼인 symbol, date, price 컬럼만 읽어 드린다.  
 ```
 
 **row단위 저장 데이터 베이스**  
@@ -70,10 +70,10 @@ SELECT price
 
 
 ### Advanced Data Encoding  
-Vertica는 디스크에 저장할 데이터를 최대한 encoding하고 압축하므로 데이터를 보다 효율적으로 저장하여 전체 스토리지 공간을 절약한다.  
-데이터에 대한 적절한 인코딩 방법은 데이터 type, 데이터 카디널리티, 데이터 정렬 여부에 따라 결정해야 하며, Vertica는 기본적으로 데이터 type별로 인코딩 방법을 제공하고 있다.(필요에 따라 변경 가능)  
-Vertica는 데이터를 인코딩된 상태로 처리하고, 가능한 한 늦게 디코딩 하려 한다.  
-쿼리가 데이터에 액세스 할 때 만 디코딩 되므로 쿼리가 보다 효율적으로 실행 될 수 있다.  
+버티카는 디스크에 저장할 데이터를 최대한 encoding하고 압축하므로 데이터를 보다 효율적으로 저장하여 전체 스토리지 공간을 절약한다.  
+데이터에 대한 적절한 인코딩 방법은 데이터 type, 데이터 카디널리티, 데이터 정렬 여부에 따라 결정해야 하며, 버티카는 기본적으로 데이터 type별로 인코딩 방법을 제공하고 있다.(필요에 따라 변경 가능)  
+버티카의 컬럼 기반 인코딩과 압축을 통해 최소화 된 데이터 크기로 I/O 수행과 Late Materialization(최대한 늦게 디코딩)을 통해 획기적으로 메모리 사용량 줄일 수 있다.
+데이터 처리는 필요한 컬럼만 가지고 와서 압축만 해제한 후 인코딩 된 상태로 수행한다.
 
 ![Advanced Data Encoding](../img/vertica_architecture_1010_04.png)  
 
