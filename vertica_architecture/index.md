@@ -29,7 +29,7 @@ Vertica architecture에 대한 정보
 > 
 > **[테이블 접근 권한](/vertica_architecture/Vertica_architecture_1100/)**  
 > 
-> **[데이터베이스 사용자 및 권한](/vertica_architecture/Vertica_architecture_1110/)**  
+> **[리소스 관리](/vertica_architecture/Vertica_architecture_1110/)**  
 > 
 
 
