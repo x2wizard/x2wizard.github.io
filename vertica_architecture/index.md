@@ -31,6 +31,8 @@ Vertica architecture에 대한 정보
 > 
 > **[리소스 관리](/vertica_architecture/Vertica_architecture_1110/)**  
 > 
+> **[backup 및 restore](/vertica_architecture/Vertica_architecture_1120/)**  
+> 
 
 
 
