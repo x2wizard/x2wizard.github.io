@@ -1,6 +1,6 @@
 ---
-title:  "backup 및 restore"
-excerpt: "버티카의 backup 및 restore에 대한 설명."
+title:  "리소스 관리"
+excerpt: "버티카의 리소스 관리."
 toc: true 
 toc_sticky: true 
 categories:
@@ -8,267 +8,136 @@ categories:
 tags:
   - vertica
   - 버티카
-  - backup
-  - restore
-  - 백업
-  - 복원
+  - resource management
+  - resource pool
+  - 리소스 관리
+  - 리소스 풀
 ---
 
-## 백업 및 복원
-버티카는 데이터베이스 백업/복원을 위해 vbr이라는 유틸리티를 제공하며, 백업/복원를 관리하기 위해 rsync를 이용한다.
-vbr을 실행하기 위해서는 configuration(.ini)파일을 지정해야 하며, 이 파일에는 백업/복원에 대한 모든 구성 매개 변수를 지정한다. 구성 매개 변수에는 백업할 항목(DB, schema, table등), 백업 위치(local, 외부storage등), 보관 주기(백업 본수) 등이 있다. 백업/복원 두 작업 모두 동일한 구성 파일(.ini)을 사용한다.
-버티카를 설치하면 /opt/vertica/share/vbr/example_configs/에 샘플 구성파일(.ini)을 제공하고 있다.
+## resource management
+모든 데이터베이스 시스템과 마찬가지로, 여러 명의 사용자가 다중 쿼리 조회, 데이터 로드 및 추출, 데이터베이스 안정성을 유지하는 시스템 테이블 조회 등이 동시에 실행 되어서 리소스 요청이 많다. 이러한 리소스 요청들을 버티카는 서로 다른 리소스 풀에서 처리할 수 있게 리소스 관리자가 제어한다.  
 
-vbr 유틸리티를 통해 가능한 작업  
-+ 데이터베이스 full 백업/복원
-+ object level 백업/복원
-+ 데이터베이스를 다른 버티카 cluster에 복사
-+ object level의 스키마/테이블 등을 다른 버티카 cluster에 복사
+![Vertica 리소스요청](../img/vertica_architecture_1110_01.png)
 
 
-## 데이터베이스 backup level
-vbr.py 유틸리티를 사용하여 다양한 Level의 데이터베이스 정보를 백업하고 복원할 수 있다.  
-+ Database-level : 데이터베이스의 모든 데이터와 metadata 백업
-+ Schema-level : 스키마의 모든 데이터와 metadata 백업
-+ Table-level : 참조 무결성 구현에 따라 특정 테이블에 대한 모든 데이터와 metadata 백업, 하나의 구성 파일을 사용하여 데이터를 더 낮은 백업 level로 복원 가능
-+ Database-level 백업에서 전체 스키마 또는 개별 테이블 복원(vertica 7.2에서 도입)
-+ Schema-level 백업에서 개별 테이블 복원
-+ Table-level 백업에서 해당 테이블만 복원
+## 쿼리 실행 주기
+쿼리가 데이터베이스에 제출되면 계획 및 실행 주기를 거친다. 이는 쿼리를 실행할 충분한 리소스가 있는지, 리소스가 부족할 경우 쿼리를 어떻게 처리할지 방법을 결정하기 위해 수행된다.  
 
-![Vertica backup level](../img/vertica_architecture_1120_01.png)
-
-데이터베이스 백업 수행 권장 시점:
-+ 정기적인 데이터베이스 유지 관리의 일환으로 정기적인 일정에 수행
-+ Vertica 업그레이드 전후 수행
-+ 대용량 데이터의 단일 로드 전후 수행
-+ 파티션을 삭제하기 전에 수행
-+ 노드를 추가, 제거 또는 교체하기 전에 수행
-+ crash(충돌)로 부터 클러스터를 리커버리한 후 수행
-
-유의 사항
-+ 업그레이드 전에 백업하지 않으면 문제가 발생하면 되돌릴 수 없으며 업그레이드 후 백업하지 않으면 이전 버전의 데이터베이스를 새 버전으로 복원할 수 없다.
-+ 노드를 추가/제거하기 전에 백업하지 않으면 클러스터 변경에 문제가 있으면 되돌릴 수 없고, 노드를 추가/제거한 후 백업하지 않으면 다른 수의 노드가 있는 데이터베이스로 복원할 수 없다.
+![Vertica 쿼리 실행 주기](../img/vertica_architecture_1110_02.png)
 
 
-## 백업 유형
+## default resource pool
+버티카는 조정 가능한 리소스 풀을 사용하여 메모리 할당, 쿼리 동시성, 쿼리 우선 순위, 쿼리 시간 초과 및 거부, 사용자 풀 할당을 제어한다.  
 
-### full backup
-full backup은 데이터베이스 카탈로그, 스키마, 테이블 및 기타 개체의 전체 사본이다. 이 백업 유형은 백업이 발생한 시점의 데이터베이스 이미지를 일관되게 제공한다. 재해 복구를 위해 full backup을 사용하여 손상되거나 불완전한 데이터베이스를 복원 할 수 있다. full backup에서 개별 object를 복원 할 수도 있다. full backup이 존재하면 vbr은 full backup 이후의 연속 백업으로 증분 백업을 만든다. 증분 백업에는 마지막 전체 또는 증분 백업이 발생한 이후에 새 데이터 또는 변경된 데이터가 포함된다.  
+![Vertica 기본 리소스 풀](../img/vertica_architecture_1110_03.png)
 
-### Object-Level backup
-하나 이상의 스키마 또는 테이블 또는 이러한 오브젝트 그룹으로 구성 된다.  
-
-### Hard-Link local backup
-hard link local backup은 전체 또는 개체 수준의 백업이 될 수 있다. 데이터베이스 카탈로그의 전체 복사본과 해당 데이터 파일에 대한 일련의 hard file link로 구성된다. 카탈로그와 데이터베이스 파일에 사용되는 파일 시스템에 hard link local backup을 저장 해야한다.  
-
-
-## 버티카 백업 및 복원 아키텍처
-버티카의 백업은 최초 전체 백업 이후 부터는 변경된 내역만 백업하는 증분 백업으로 수행된다.  
-
-![Vertica backup 진행](../img/vertica_architecture_1120_02.png)
-
-또한 이전 시점으로 복구 요청 시 버티카는 전체 백업과 그 이후 발생한 모든 증분 백업을 다시 복구하는 과정을 거치지 않고 유실된 데이터에 해당하는 영역에 대해서만 복구하는 아키텍처를 가지고 있습니다. 또한, 전체 백업본에서 특정 스키마 및 객체만 복구할 수 있는 기능이 포함됩니다.  
-
-![Vertica 복구 방안 비교](../img/vertica_architecture_1120_03.png)
+|리소스 풀명   | 설명|
+|:-----------:|:----------------------------|
+|GENERAL      |사용자 쿼리가 실행되는 기본 풀. 시스템 메모리의 백분율로 캡쳐된 사용 가능한 메모리 크기.|
+|SYSQUERY     |v_monitor, v_catalog 및 v_internal 스키마의 테이블에 대해 제출된 쿼리에 대한 리소스를 제어하고, <br>일반적으로 사용 가능한 리소스에 대해 시스템 테이블 쿼리가 경합되지 않도록 유지.|
+|SYSDATA      |시스템 테이블에 대한 중간 쿼리 결과의 임시 저장.|
+|TM           |모든 Tuple Mover 태스크는 이 풀의 리소스에서 실행.|
+|WOSDATA      |디스크로 이동하기 전에 데이터를 메모리에 로드할 때 사용.|
+|DBD          |DBD 생성 및 배포를 위한 기본 풀.|
+|RECOVERY     |노드 복구를 처리하는 데 사용됨.|
+|REFRESH      |projection 새로 고침을 처리하는 데 사용됨|
+|JVM          |JVM을 통한 Java UDx 요청에 사용.|
+|METADATA     |카탈로그 및 데이터 구조에 대한 메모리 할당 관리.|
+|BLOBDATA     |기계 학습 기능에 대한 메모리 할당.|
 
 
-## 백업을 위한 구성파일(.ini) 샘플
-버티카가 설치된 node의 /opt/vertica/share/vbr/example_configs 경로에 각각 다른 백업 및 복원 시나리오에 적합한 샘플 백업 구성 파일을 제공하고 있다.  
+## 주요 resource pool parameter
 
-|backup 구성파일(.ini)                  | 설명 |
-|:-----------------------------------:|:-------------------------------------------------|
-|backup_restore_full_local.ini        | 각 데이터베이스 호스트에서 해당 호스트 백업을 위한 전체 데이터베이스 백업|
-|backup_restore_full_hardlink.ini     | 각 데이터베이스 호스트에서 하드 링크를 사용한 해당 호스트 백업에 대한 전체 데이터베이스 백업|
-|backup_restore_object_local.ini      | 하나 이상의 지정된 스키마를 로컬 Disk에 백업/복원|
-|backup_restore_full_external.ini     | 각 데이터베이스 노드에서 고유한 백업 호스트로 병렬 백업/복원|
-|replicate.ini                        | UP 데이터베이스 간에 하나 또는 하나 이상의 테이블/스키마 복제|
-|copycluster.ini                      | UP 데이터베이스를 DOWN 데이터베이스에 복사|
-|restore_to_other_cluster.ini         | 전체 백업을 다른 클러스터에 복원|
-|backup_restore_s3.ini                | AWS S3 공유 스토리지에 백업/복원|
+|파라미터 명            |설명|
+|:------------------:|-----------------------------------------------|
+|MEMORYSIZE          |pool의 예약된 메모리 사이즈|
+|MAXMEMORYSIZE       |pool에서 사용할 수 있는 최대 예약 메모리 사이즈|
+|PLANNEDCONCURRENCY  |예상 동시 쿼리 수|
+|MAXCONCURRENCY      |동시 쿼리 최대 수|
+|PRIORITY            |대기 중인 쿼리의 경우 이 pool에 대한 요청의 우선 순위|
+|QUEUETIMEOUT        |대기 중인 쿼리의 경우, 거부되기 전에 쿼리를 대기할 수 있는 최대 시간(초)|
+|CPUAFFINITYSET      |CPU 쿼리의 서브셋이 실행될 것이다.|
+|CPUAFFINITYMODE     |모든 노드, 특정 노드 또는 CPUAFFINITY에 의해 정의된 집합에서 쿼리가 실행될 것인가|
+|EXECUTIONPARALLELISM|단일 쿼리로 처리하는 데 사용되는 스레드 수 제한|
+|RUNTIMEPRIORITY     |pool의 쿼리에 할당된 런타임 리소스 양|
+|RUNTIMEPRIORITYHRESHOLD|RUNTIMEPRIORITY가 호출되기까지의 런타임(초)|
+|RUNTIMECAP          |pool에서 쿼리가 실행될 최대 시간(초)|
+|CASCADETO           | RUNTIMECAP에 도달하면, 지정한 pool이 대신 쿼리를 실행|
 
-### 예시 backup_restore_full_local.ini
-샘플로 제공되는 각 구성 파일 내에서 필요한 모든 백업 구성 매개 변수가 정의되어 있다.  
+**memorysize** : GENERAL 풀의 경우 이 설정은 다른 모든 풀의 예약된 메모리를 뺀 최대 메모리 크기이며, 8GB 노드의 경우 메모리 크기는 7.236GB가 된다.  
+**maxmemorysize** : GENERAL 풀의 경우 default로 OS 메모리의 95%로 설정된다. WOSDATA 풀의 경우 이 설정은 사용 가능한 RAM의 25% 또는 2GB 중 더 작은 값으로 설정 된다.  
+**plannedconcurrency** : 최소값이 4 이며, 기본값은 노드당 코어 수로 설정된다. AUTO로 설정하면 코어 수 또는 메모리 사이즈/2GB 중 낮은 값으로 설정된다.  
+**priority** : 기본 척도는 -110 ~ 110 임.  
+**executionparallelism** : 스레드 수가 1개에서 노드의 코어 수 사이.  
+**cpuaffinityset, cpuaffinity mode** : 특별한 사용 설정이며, 기술 지원 지침에 따라서만 변경.  
+**runtimepriority** : runtimethreshold에 도달한 경우에만 문제.  
+**cascade to**: 이 항목은 runtimecap이 초과될 경우 쿼리가 롤오버 되는 보조 리소스 풀을 가리킴.  
 
-```
-vi /opt/vertica/share/vbr/example_configs/backup_restore_full_local.ini
-; This is a sample vbr configuration file for backup and restore using a file system on each database host for that host's backup.
-; Section headings are enclosed by square brackets.
-; Comments have leading semicolons (;) or pound signs (#).
-; An equal sign separates options and values.
-; Specify arguments marked '!!Mandatory!!' explicitly.
-; All commented parameters are set to their default value.
-
-; ------------------------------------------- ;
-;;; BASIC PARAMETERS ;;;
-; ------------------------------------------- ;
-
-[Mapping]
-; !!Mandatory!! For each database node there must be one [Mapping] entry to indicate the directory to store the backup.
-; node_name = backup_host:backup_dir
-; [] indicates backup to localhost
-v_exampledb_node0001 = []:/home/dbadmin/backups
-v_exampledb_node0002 = []:/home/dbadmin/backups
-v_exampledb_node0003 = []:/home/dbadmin/backups
-v_exampledb_node0004 = []:/home/dbadmin/backups
-
-[Misc]
-; !!Recommended!! Snapshot name
-; Backups with the same snapshotName form a time sequence limited by restorePointLimit.
-; SnapshotName is used for naming archives in the backup directory, and for monitoring and troubleshooting.
-; Valid values: a-z A-Z 0-9 - _
-; snapshotName = backup_snapshot
-
-[Database]
-; !!Recommended!! If you have more than one database defined on this Vertica cluster, use this parameter to specify which database to backup/restore.
-; dbName = current_database
-
-; If this parameter is True, vbr prompts the user for the database password every time.
-; If False, specify the location of password config file in 'passwordFile' parameter in [Misc] section.
-; dbPromptForPassword = True
-```
-
-|구성파일(.ini) section |  설명 |
-|:------------:|:-----------------------------|
-|[Mapping]     | 데이터베이스 노드 이름과 해당 노드의 백업 위치에 대한 전체 경로를 입력
-|[Misc]        | snapshotName 필드에는 백업 이름 지정
-|[Database]    | dbName 필드에 데이터베이스 이름 입력<br>dbPromptForPassword 필드에서 데이터베이스를 백업 또는 복원하는데 <br>데이터베이스 슈퍼 사용자 암호가 필요한지 확인(기본값은 True, Vertica는 기본값은 변경하지 않도록 권장)|
+resource pool들의 설정 값은 시스템 테이블인 resource_pools을 통해 확인 할 수 있다.  
 
 
-## 백업/복원 수행 
+## MEMORYSIZE와 MAXMEMORYSIZE의 관계
+MEMORYSIZE는 resource pool이 기본으로 할당되는 메모리 사이즈 이며, MAXMEMORYSIZE는 resource pool에서 최대로 사용 할 수 있는 메모리 사이즈이다.  
+예를 들어 MEMORYSIZE=4G 이고 MAXMEMORYSIZE=5G인 pool에서 쿼리가 필요로 하는 메모리가 6G인 경우 general pool에서 추가적으로 메모리 할당을 1G까지만 받을 수 있기 때문에 쿼리가 필요한 메모리를 확보하지 못해서 쿼리는 reject이 된다. 동일하게 쿼리가 MEMORYSIZE=4G 이고 MAXMEMORYSIZE=8G pool의 경우에는 MEMORYSIZE에서 부족한 2G를 general pool에서 할당 받아 처리 할 수 있게 된다.  
+이처럼 MAXMEMORYSIZE는 쿼리 수행시 기본으로 할당 받은 MEMORYSIZE에서 부족한 메모리를 general pool에서 최대한 할당 받을 수 있는 메모리 사이즈이다.(MAXMEMORYSIZE - MEMORYSIZE를 general pool에서 할당 받을 수 있음.)  
 
-### backup location 초기화
-데이터베이스를 처음 백업하기 전에 vbr --task init를 사용하여 백업이 저장될 디렉터리를 초기화해야 한다. 그러면 빈 manifest파일이 생성되고 백업이 완료된 후 manifest파일이 업데이트 된다.  
-데이터베이스를 초기화되지 않은 위치에 백업하려고 하면 오류가 발생한다.  
-이 태스크로 생성된 글로벌 manifest파일에는 두 개의 섹션이 있다.  
-+ [Snapshots] 모든 백업에 대한 항목
-+ [Object] 각 고유 객체에 대한 항목이 있다. 객체가 여러 백업(일반적으로 증분)에 의해 공유되는 경우, 이는 제 계산에 의해 표시된다.
 
-```
---백업 데이터 보관 폴더 생성
-[dbadmin@localhost ~]$ mkdir /vertica/backup
+## Query Concurrency Planning
+PLANNEDCONCURRENCY를 통해 해당 pool에서 동시에 처리 할 수 있는 쿼리 수를 예상 할 수 있다. 명시적으로 설정하지 않으면 노드의 코어수 or 노드의 총메모리를 2GB로 나눈 값 중 작은 값이 된다.  
+PLANNEDCONCURRENCY는 실제 메모리 사용이 아니라 메모리 budget에 관한 것이다. 쿼리가 제출되면 budget이 계산되고 예상 메모리가 쿼리에 할당된다. 쿼리가 실행되기 시작하면 실제 메모리 요구 사항을 알 수 있다.  
+resource_pool_status 테이블의 query_budget_kb컬럼에 쿼리당 할당되는 메모리 butget을 확인 할 수 있다.  
++ 쿼리에 budget 보다 적은 메모리가 필요한 경우, 추가 메모리는 다른 곳에서 사용 할 수 있도록 해제 되지 않음.
++ 쿼리에 budget 보다 더 많은 메모리가 필요한 경우, 추가 메모리는 현재 풀의 메모리, general 풀의 메모리 순서로 가져온다. 그래도 메모리가 충분하지 않으면 메모리가 충분히 사용할 수 있을 때까지 쿼리가 대기 상태가 된다.
 
-[dbadmin@localhost ~]$ pwd
-/home/dbadmin
+각 pool의 쿼리당 할당되는 평균 메모리 사이즈 계산은 아래와 같다.  
++ MEMORYSIZE를 PLANNEDCONCURRENCY로 나누다.
 
---백업 구성 파일 및 패스워드 파일
-[dbadmin@localhost ~]$ ls -a .backup* backup*
-backup.ini  .backup_pwd
+![Vertica 쿼리당 budget계산1](../img/vertica_architecture_1110_04.png)
 
---백업 구성 파일 내용
-[dbadmin@localhost ~]$ cat backup.ini
-[Mapping]
-v_vmart_node0001 = []:/vertica/backup
++ MEMORYSIZE가 설정되지 않은 경우, MAXMEMORYSIZE를 PLANNEDCONCURRENCY로 나눈다.
 
-[Misc]
-snapshotName = vmark_bak
-restorePointLimit = 5
-passwordFile = /home/dbadmin/DBA/BACKUP/.backup_pwd
+![Vertica 쿼리당 budget계산2](../img/vertica_architecture_1110_05.png)
 
-[Database]
-dbName = VMart
-dbUser = dbadmin
++ MEMORYSIZE, MAXMEMORYSIZE가 설정되지 않은 경우, general pool과 wosdata pool의 MEMORYSIZE의 차이를 PLANNEDCONCURRENCY로 나눈다.
 
---패스워드 파일 
-[dbadmin@localhost ~]$ cat .backup_pwd
-# password
-[Passwords]
-dbPassword = password
+![Vertica 쿼리당 budget계산3](../img/vertica_architecture_1110_06.png)
 
---backup location 초기화
-[dbadmin@localhost ~]$ /opt/vertica/bin/vbr -t init -c /home/dbadmin/backup.ini
-Initializing backup locations.
-Backup locations initialized.
+예를 들어 MEMORYSIZE: 5G / PLANNEDCONCURRENCY: 5 / MAXCONCURRENCY: 6 인 ABC 리소스 풀에 할당된 7명의 사용자가 동시네 1GB가 필요한 쿼리를 요청한다고 가정해보자.  
 
-[dbadmin@localhost ~]$ ls /vertica/backup/
-backup_manifest
+![Vertica 쿼리 동시 수행 예제](../img/vertica_architecture_1110_07.png)
 
-[dbadmin@localhost ~]$ cat /vertica/backup/backup_manifest
-[snapshots]
-[objects]
-```
+이 pool에 대해 쿼리당 할당된 메모리가 1GB인지 확인하기 위해 계산을 수행한 후:  
++ ABC pool은 한번에 5개의 동시 쿼리를 계획하므로, 처음 5개의 쿼리는 ABC pool에서 메모리를 얻는다.  
++ ABC pool은 최대 6개의 동시 쿼리를 허용하지만 메모리 자체는 충분하지 않다. 그것은 general pool에서 메모리를 빌려온다. 쿼리는 general이 아니라 ABC에서 실행된다.  
++ ABC pool은 동시 쿼리를 6개만 허용하기 때문에 7번째 쿼리는 대기열에 들어간다. 다른 6개의 쿼리 중 하나가 완료되면 ABC pool의 메모리에서 7번째 쿼리가 실행된다.
 
-### backup 수행
-데이터베이스 백업시 vbr --task backup를 사용하여 백업을 수행한다.  
-데이터베이스를 백업하려면 모든 노드가 실행되고 있어야 한다. 이 중 하나라도 중단된 경우 백업이 실패한다.  
-+ 노드가 다운되면 LGE가 클러스터 전진을 중지함
-+ 백업 프로세스에서 projection 및 buddy projection에 대한 데이터베이스 metadata에 액세스해야 하며, 노드가 중단되면 이를 모두 얻을 수 없음
 
-```
---backup 수행
-[dbadmin@localhost ~]$ /opt/vertica/bin/vbr -t backup -c /home/dbadmin//backup.ini
-Starting backup of database VMart.
-Participating nodes: v_vmart_node0001.
-Snapshotting database.
-Snapshot complete.
-Approximate bytes to copy: 993812867 of 993812867 total.
-[==================================================] 100%
-Copying backup metadata.
-Finalizing backup.
-Backup complete!
+## resource pool 모니터링 시스템 테이블
 
---backup 수행 후 생성된 목록
-[dbadmin@localhost ~]$ ls /vertica/backup/
-backup_manifest  Objects  Snapshots
+|시스템 테이블                    |설명|
+|:---------------------------:|:------------------------------------|
+|RESOURCE_POOL_DEFAULTS       |기본 제공 및 사용자 정의 풀에 대한 기본 매개 변수 설정 포함. 풀에 값을 명시적으로 설정하지 않은 경우 이 값을 사용한다.|
+|RESOURCE_POOL_STATUS         |메모리 사용량을 포함한 리소스 풀의 현재 상태, 동시 쿼리 수|
+|RESOURCE_ACQUISITIONS        |실행 중인 쿼리에 부여된 리소스 상태, 완료된 쿼리의 기록 포함|
+|RESOURCE_QUEES               |대기열에서 대기 중인 쿼리 목록과 풀 및 우선 순위 정보|
+|RESOURCE_REJECTIONS          |중단된 쿼리 및 reject 사유에 대한 통계|
+|RESOURCE_REJECTION_DETAILS   |버티카가 reject하는 각 리소스 요청에 대한 항목 기록|
 
---Snapshot 생성 파일 목록
-[dbadmin@localhost ~]$ ls /vertica/backup/Snapshots/
-vmark_bak_20200213_090029
 
---backup 생성 체크
-[dbadmin@localhost ~]$ /opt/vertica/bin/vbr -t full-check -c /home/dbadmin//backup.iniChecking backup consistency.
-List all snapshots in backup location:
-Snapshot name and restore point: vmark_bak_20200213_090029, nodes:['v_vmart_node0001'].
-Regenerating backup manifest for location [127.0.0.1]:/vertica/backup
-Snapshots that have missing objects(hint: use 'vbr --task remove' to delete these snapshots):
-Backup locations have 0 unreferenced objects
-Backup locations have 0 missing objects
-Backup consistency check complete.
-```
+## 사용자 정의 resource pool
+모든 버티카 사용자는 한 개의 resource pool에만 할당되며, 모든 쿼리는 해당 pool에서 실행된다. resource pool을 지정하지 않으면 새 사용자는 자동으로 general pool에 할당된다.  
+사용자 정의 resource pool을 생성하여 사용자, 어플리케이션, 쿼리등의 다양한 형태의 workload들을 분리해서 리소스 관리를 할 수 있다.  
 
-### backup 복원
-전체 데이터베이스를 복원하려면 데이터베이스가 중단 되어 있어야 하며, 스키마 또는 테이블을 복원하려면 데이터베이스가 실행 중이어야 한다.  
-
-**테이블 삭제**  
 ```sql
-dbadmin=> select * from t;
-c
----
-1
-(1 row)
+--resource pool생성
+CREATE RESOURCE POOL pool-name MEMORYSIZE '10G' MAXMEMORYSIZE '20G' [parameter‑name setting]...;
 
-dbadmin=> drop table t;
-DROP TABLE
-dbadmin=> select * from t;
-ERROR 4566:  Relation "t" does not exist
+--사용자 생성시 resource pool 지정
+CREATE USER test RESOURCE POOL pool-name;
+
+--존재하는 사용자에게 resource pool 지정
+ALTER USER test RESOURCE POOL pool-name ;
 ```
 
-***테이블 복원***  
-```
-[dbadmin@localhost ~]$ /opt/vertica/bin/vbr -t restore -c /home/dbadmin//backup.ini --restore-objects=public.t
-Starting object restore of database VMart.
-Restoring from restore point: vmark_bak_20200213_090029
-Participating nodes: v_vmart_node0001.
-Loading snapshot catalog from backup.
-Objects to restore: public.t
-Preprocessing snapshot...
-Preprocessing complete.
-Restoring objects: public.t
-Approximate bytes to copy: 76.
-Syncing data from backup to cluster nodes.
-[==================================================] 100%
-Finalizing restore.
-Restore complete!
-```
 
-***테이블 복원 확인***  
-```sql
-dbadmin=> select * from t;
-c
----
-1
-(1 row)
-```
 
-&nbsp;  
-&nbsp;  
-자세한 backup 관련 [버티카 매뉴얼](https://www.vertica.com/docs/9.3.x/HTML/Content/Authoring/AdministratorsGuide/BackupRestore/BackingUpAndRestoringTheDatabase.htm?tocpath=Administrator%27s%20Guide%7CBacking%20Up%20and%20Restoring%20the%20Database%7C_____0){:target="_blank"} 을 참고 하기 바란다.
