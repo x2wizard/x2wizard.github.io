@@ -109,7 +109,7 @@ analytics:
 author:
   name             : "x2wizard"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "버티카는 대용량 데이터 분석을 위한 <br>Pure-MPP 구성의 <br>ANSI SQL99+를 지원하는 컬럼기반 RDBMS<br><br>버티카 관련 질문 있은 메일로 주기면 됩니다."
+  bio              : "버티카는 <br>대용량 데이터 분석을 위한 <br>Pure-MPP 구성의 <br>ANSI SQL99+를 지원하는 <br>컬럼기반 RDBMS 이다.<br><br>버티카 관련 질문은 메일로 주기면 됩니다."
   location         : "South Korea"
   email            :
   links:
