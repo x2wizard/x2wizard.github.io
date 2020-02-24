@@ -1,8 +1,8 @@
 ---
 title:  "Vertica Q&A"
 excerpt: "Vertica Q&A는 메일로 문의해 주세요"
-toc: true #heading 리스트 사이즈 바
-toc_sticky: true #heading 리스트 사이즈 바 유지
+#toc: true #heading 리스트 사이즈 바
+#toc_sticky: true #heading 리스트 사이즈 바 유지
 categories:
   - vertica_etc
 tags:
@@ -10,14 +10,17 @@ tags:
 ---
 
 ## 버티카 Q&A
+&nbsp;  
+&nbsp;  
+# **구글 그룹스를 이용해서 버티카 Q&A를 진행하고 있습니다.**  
 
-**구글 그룹스를 이용해서 버티카 Q&A를 진행하고 있습니다.**  
-
-**[구글 그룹스](https://groups.google.com/forum/?hl=ko#!overview)에 접속해서 "버티카 Q&A"로 검색하시거나,   
-아래 링크에 접속하셔서 질문해 주시면 답변 드리도록 하겠습니다.**  
-
-**[버티카 Q&A](https://groups.google.com/forum/#!forum/vertica_qna){:target="_blank"}**  
-  
+# [구글 그룹스](https://groups.google.com/forum/?hl=ko#!overview)에 접속해서 "버티카 Q&A"로 검색하시거나,   
+# 아래 링크에 접속하셔서 질문해 주시면 됩니다.
+&nbsp;  
+# **[버티카 Q&A](https://groups.google.com/forum/#!forum/vertica_qna){:target="_blank"}**  
+&nbsp;  
+&nbsp;  
+&nbsp;  
 
 ----------------------------------------------------------------  
 혹시 비공개 질문이 필요하신 분은 메일로 문의 주시기 바랍니다.  
