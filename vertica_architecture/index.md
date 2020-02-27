@@ -33,6 +33,12 @@ Vertica architecture에 대한 정보
 > 
 > **[backup 및 restore](/vertica_architecture/Vertica_architecture_1120/)**  
 > 
+> **[버티카 Enterprise mode](/vertica_architecture/Vertica_architecture_1130/)**  
+> 
+> **[버티카 Eon mode](/vertica_architecture/Vertica_architecture_1140/)**  
+> 
+> **[버티카 Eon mode 그림으로 소개](/vertica_architecture/Vertica_architecture_1141/)**  
+> 
 
 
 
