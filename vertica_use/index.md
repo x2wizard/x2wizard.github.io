@@ -13,3 +13,5 @@ taxonomy: vertica_use
 > **[vertica.com 소개](/vertica_use/Vertica_use_1000/)**  
 > 
 > **[vertica 접속하기](/vertica_use/Vertica_use_1010/)**  
+> 
+> **[VM환경에서 vertica 3 node 구성](/vertica_use/Vertica_use_1020/)**  

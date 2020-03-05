@@ -1,3 +1,14 @@
-{%- for post in site.categories[include.taxonomy] -%}
-  {% include archive-single.html %}
-{%- endfor -%}
+<!-- category의 reversed를 통해 정렬을 날짜 순으로 할 수 있다.  -->
+
+{% assign category_array = ['vertica_architecture', 'vertica_use'] %}
+
+{% if category_array contains include.taxonomy  %}
+	{%- for post in site.categories[include.taxonomy]  -%}
+	  {% include archive-single.html %}
+	{%- endfor -%}
+{% else %}
+	{%- for post in site.categories[include.taxonomy] reversed -%}
+	  {% include archive-single.html %}
+	{%- endfor -%}
+{% endif %}
+
