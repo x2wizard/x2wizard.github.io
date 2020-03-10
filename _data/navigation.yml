@@ -9,7 +9,8 @@ main:
   - title: "Vertica Architecture"
     url: /vertica_architecture/
   - title: "Vertica Use"
-    url: /vertica_use/
+#    url: /vertica_use/
+    url: /category/vertica_use/
   - title: "Etc"
     url: /vertica_etc/
   # - title: "Sample Posts"
