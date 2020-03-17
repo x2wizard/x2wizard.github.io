@@ -46,7 +46,7 @@ COPY문은 insert문 처럼 레코드 단위로 데이터를 저장하지 않고
 
 ## Direct DML
 버티카에서는 /\*+DIRECT\*/힌트 또는 Direct옵션을 통해 대량의 데이터 적재(COPY), 대량의 데이터 변경(UPDATE, DELETE), 큰 테이블의 데이터 복사(INSERT SELECT)등을 빠르게 할 수 있다.  
-빈번한 Direct DML을 수행하므로써 ROS 컨테이너가 급증하지 않도록 주의 해야한다.  
+DIRECT DML를 수행하면 데이터를 WOS에 쓰지 않고 직접 ROS에 쓰게되므로 적재 속도가 빨라진다. 단 빈번한 Direct DML을 수행하면 ROS 컨테이너가 급증하게 되므로 주의 해야한다.(ROS Pushback현상 발생 원인이 됨)  
 
 ```sql
 --데이터 입력 또는 테이블 간 데이터 복사
