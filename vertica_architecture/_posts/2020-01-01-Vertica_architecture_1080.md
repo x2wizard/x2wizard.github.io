@@ -33,7 +33,9 @@ dbadmin=> create table t(col1 int);
 CREATE TABLE
 
 --projection생성 확인
-dbadmin=> select projection_schema, projection_name, anchor_table_name, is_super_projection from projections where anchor_table_name = 't';
+dbadmin=> select projection_schema, projection_name, anchor_table_name, is_super_projection 
+dbadmin=>   from projections 
+dbadmin=>  where anchor_table_name = 't';
 projection_schema | projection_name | anchor_table_name | is_super_projection
 -------------------+-----------------+-------------------+---------------------
 (0 rows)
@@ -45,7 +47,9 @@ OUTPUT
 (1 row)
 
 --insert후 projection생성 확인
-dbadmin=> select projection_schema, projection_name, anchor_table_name, is_super_projection from projections where anchor_table_name = 't';
+dbadmin=> select projection_schema, projection_name, anchor_table_name, is_super_projection 
+dbadmin=>   from projections 
+dbadmin=>  where anchor_table_name = 't';
 projection_schema | projection_name | anchor_table_name | is_super_projection
 -------------------+-----------------+-------------------+---------------------
 public            | t_super         | t                 | t
@@ -55,7 +59,9 @@ dbadmin=> commit;
 COMMIT
 
 --projection_storage 테이블 확인
-dbadmin=> select node_name, projection_name, row_count, wos_row_count, ros_row_count, ros_count from projection_storage where anchor_table_name = 't';
+dbadmin=> select node_name, projection_name, row_count, wos_row_count, ros_row_count, ros_count 
+dbadmin=>   from projection_storage 
+dbadmin=>  where anchor_table_name = 't';
 
     node_name     | projection_name | row_count | wos_row_count | ros_row_count | ros_count
 ------------------+-----------------+-----------+---------------+---------------+-----------
@@ -63,7 +69,9 @@ v_vmart_node0001 | t_super         |         1 |             0 |             1 |
 (1 row)
 
 --storage_containers 테이블 확인
-dbadmin=> select node_name, projection_name, storage_type, total_row_count, deleted_row_count, delete_vector_count from storage_containers where projection_name = 't_super';
+dbadmin=> select node_name, projection_name, storage_type, total_row_count, deleted_row_count, delete_vector_count 
+dbadmin=>   from storage_containers 
+dbadmin=>  where projection_name = 't_super';
     node_name     | projection_name | storage_type | total_row_count | deleted_row_count | delete_vector_count
 ------------------+-----------------+--------------+-----------------+-------------------+---------------------
 v_vmart_node0001 | t_super         | ROS          |               1 |                 0 |                   0
@@ -76,21 +84,27 @@ dbadmin=> truncate table t;
 TRUNCATE TABLE
 
 --projection 확인
-dbadmin=> select projection_schema, projection_name, anchor_table_name, is_super_projection from projections where anchor_table_name = 't';
+dbadmin=> select projection_schema, projection_name, anchor_table_name, is_super_projection 
+dbadmin=>   from projections 
+dbadmin=>  where anchor_table_name = 't';
 projection_schema | projection_name | anchor_table_name | is_super_projection
 -------------------+-----------------+-------------------+---------------------
 public            | t_super         | t                 | t
 (1 row)
 
 --projection_storage 테이블 확인
-dbadmin=> select node_name, projection_name, row_count, wos_row_count, ros_row_count, ros_count from projection_storage where anchor_table_name = 't';
+dbadmin=> select node_name, projection_name, row_count, wos_row_count, ros_row_count, ros_count 
+dbadmin=>   from projection_storage 
+dbadmin=>  where anchor_table_name = 't';
     node_name     | projection_name | row_count | wos_row_count | ros_row_count | ros_count
 ------------------+-----------------+-----------+---------------+---------------+-----------
 v_vmart_node0001 | t_super         |         0 |             0 |             0 |         0
 (1 row)
 
 --storage_containers 테이블 확인
-dbadmin=> select node_name, projection_name, storage_type, total_row_count, deleted_row_count, delete_vector_count from storage_containers where projection_name = 't_super';
+dbadmin=> select node_name, projection_name, storage_type, total_row_count, deleted_row_count, delete_vector_count 
+dbadmin=>   from storage_containers 
+dbadmin=>  where projection_name = 't_super';
 node_name | projection_name | storage_type | total_row_count | deleted_row_count | delete_vector_count
 -----------+-----------------+--------------+-----------------+-------------------+---------------------
 (0 rows)
@@ -117,19 +131,25 @@ table_schema | table_name
 (0 rows)
 
 --projections 확인
-dbadmin=> select projection_schema, projection_name, anchor_table_name, is_super_projection from projections where anchor_table_name = 't';
+dbadmin=> select projection_schema, projection_name, anchor_table_name, is_super_projection 
+dbadmin=>   from projections 
+dbadmin=>  where anchor_table_name = 't';
 projection_schema | projection_name | anchor_table_name | is_super_projection
 -------------------+-----------------+-------------------+---------------------
 (0 rows)
 
 --projection_storage 확인
-dbadmin=> select node_name, projection_name, row_count, wos_row_count, ros_row_count, ros_count from projection_storage where anchor_table_name = 't';
+dbadmin=> select node_name, projection_name, row_count, wos_row_count, ros_row_count, ros_count 
+dbadmin=>   from projection_storage 
+dbadmin=>  where anchor_table_name = 't';
 node_name | projection_name | row_count | wos_row_count | ros_row_count | ros_count
 -----------+-----------------+-----------+---------------+---------------+-----------
 (0 rows)
 
 --storage_containers 확인
-dbadmin=> select node_name, projection_name, storage_type, total_row_count, deleted_row_count, delete_vector_count from storage_containers where projection_name = 't_super';
+dbadmin=> select node_name, projection_name, storage_type, total_row_count, deleted_row_count, delete_vector_count 
+dbadmin=>   from storage_containers 
+dbadmin=>  where projection_name = 't_super';
 node_name | projection_name | storage_type | total_row_count | deleted_row_count | delete_vector_count
 -----------+-----------------+--------------+-----------------+-------------------+---------------------
 (0 rows)
@@ -217,14 +237,18 @@ epoch | col1
 (3 rows)
 
 --데이터 저장 컨테이너 id 확인(storage_oid)
-dbadmin=> select node_name, projection_name, storage_type, storage_oid, total_row_count, deleted_row_count, delete_vector_count from storage_containers where projection_name = 't_super';
+dbadmin=> select node_name, projection_name, storage_type, storage_oid, total_row_count, deleted_row_count, delete_vector_count 
+dbadmin=>   from storage_containers 
+dbadmin=>  where projection_name = 't_super';
     node_name     | projection_name | storage_type |    storage_oid    | total_row_count | deleted_row_count | delete_vector_count
 ------------------+-----------------+--------------+-------------------+-----------------+-------------------+---------------------
 v_vmart_node0001 | t_super         | ROS          | 45035996273861485 |               5 |                 2 |                   1
 (1 row)
 
 --delete vector 확인
-dbadmin=> select node_name, storage_type, storage_oid, deleted_row_count, start_epoch, end_epoch from delete_vectors where projection_name = 't_super';
+dbadmin=> select node_name, storage_type, storage_oid, deleted_row_count, start_epoch, end_epoch 
+dbadmin=>   from delete_vectors 
+dbadmin=>  where projection_name = 't_super';
     node_name     | storage_type |    storage_oid    | deleted_row_count | start_epoch | end_epoch
 ------------------+--------------+-------------------+-------------------+-------------+-----------
 v_vmart_node0001 | DVROS        | 45035996273861485 |                 2 |         181 |       181
@@ -261,14 +285,18 @@ Task: purge operation
 (1 row)
 
 --purge된 데이터 삭제후 신규로 생성되니 데이터 저장 컨테이너 id 확인(storage_oid)
-dbadmin=> select node_name, projection_name, storage_type, storage_oid, total_row_count, deleted_row_count, delete_vector_count from storage_containers where projection_name = 't_super';
+dbadmin=> select node_name, projection_name, storage_type, storage_oid, total_row_count, deleted_row_count, delete_vector_count 
+dbadmin=>   from storage_containers 
+dbadmin=>  where projection_name = 't_super';
     node_name     | projection_name | storage_type |    storage_oid    | total_row_count | deleted_row_count | delete_vector_count
 ------------------+-----------------+--------------+-------------------+-----------------+-------------------+---------------------
 v_vmart_node0001 | t_super         | ROS          | 45035996273861517 |               3 |                 0 |                   0
 (1 row)
 
 --delete vector purge된 결과 확인
-dbadmin=> select node_name, storage_type, storage_oid, deleted_row_count, start_epoch, end_epoch from delete_vectors where projection_name = 't_super';
+dbadmin=> select node_name, storage_type, storage_oid, deleted_row_count, start_epoch, end_epoch 
+dbadmin=>   from delete_vectors 
+dbadmin=>  where projection_name = 't_super';
 node_name | storage_type | storage_oid | deleted_row_count | start_epoch | end_epoch
 -----------+--------------+-------------+-------------------+-------------+-----------
 (0 rows)
