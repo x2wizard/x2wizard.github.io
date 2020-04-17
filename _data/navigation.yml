@@ -12,7 +12,7 @@ main:
 #    url: /vertica_use/
     url: /category/vertica_use
   - title: "Etc"
-    url: /vertica_etc/
+    url: /category/vertica_etc
   # - title: "Sample Posts"
   #   url: /year-archive/
   # - title: "Sample Collections"
