@@ -147,8 +147,8 @@ col1
 
 ## object별 할당 가능한 권한
 
-|ALTER|DROP|CREATE|DELETE|EXECUTE|INSERT|READ|REFERENCES|SELECT|TEMP|TRUNCATE|UPDATE|USAGE|WRITE|
-|:---:|:---:|:----:|:----:|:-----:|:----:|:---:|:--------:|:----:|:--:|:------:|:----:|:---:|:---:|
+|object|ALTER|DROP|CREATE|DELETE|EXECUTE|INSERT|READ|REFERENCES|SELECT|TEMP|TRUNCATE|UPDATE|USAGE|WRITE|
+|:---:|:---:|:----:|:----:|:-----:|:----:|:---:|:--------:|:----:|:--:|:------:|:----:|:---:|:---:|:---:|
 |Database| | |•| | | | | | |•| | | | |
 |Schema  |!|!|•|!| |!| |!|!| |!|!|•| |
 |Table   |•|•| |•| |•| |•|•| |•|•| | |
@@ -161,6 +161,7 @@ col1
 |Resource Pool   | | | | | | | | | | | |•| |
 |Storage Location| | | | | | |•| | | | | |•|
 
+!는 해당 스키마의 table, view에 상속가능한 권한
 
 ## 테이블 데이터에 대한 액세스 제한
 
