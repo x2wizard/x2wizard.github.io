@@ -102,7 +102,7 @@ resource_pool_status 테이블의 query_budget_kb컬럼에 쿼리당 할당되�
 
 ![Vertica 쿼리당 budget계산3](../img/vertica_architecture_1110_06.png)
 
-예를 들어 MEMORYSIZE: 5G / PLANNEDCONCURRENCY: 5 / MAXCONCURRENCY: 6 인 ABC 리소스 풀에 할당된 7명의 사용자가 동시네 1GB가 필요한 쿼리를 요청한다고 가정해보자.  
+예를 들어 MEMORYSIZE: 5G / MAXMEMORYSIZE: 6G / PLANNEDCONCURRENCY: 5 / MAXCONCURRENCY: 6 인 ABC 리소스 풀에 할당된 7명의 사용자가 동시네 1GB가 필요한 쿼리를 요청한다고 가정해보자.  
 
 ![Vertica 쿼리 동시 수행 예제](../img/vertica_architecture_1110_07.png)
 
@@ -130,7 +130,7 @@ resource_pool_status 테이블의 query_budget_kb컬럼에 쿼리당 할당되�
 
 ```sql
 --resource pool생성
-CREATE RESOURCE POOL pool-name MEMORYSIZE '10G' MAXMEMORYSIZE '20G' [parameter‑name setting]...;
+CREATE RESOURCE POOL pool-name MEMORYSIZE '10G' MAXMEMORYSIZE '20G' [parameter-name setting]...;
 
 --사용자 생성시 resource pool 지정
 CREATE USER test RESOURCE POOL pool-name;
