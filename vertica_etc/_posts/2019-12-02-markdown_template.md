@@ -1,13 +1,14 @@
 ---
 title:  "markdown 표기 샘플"
 excerpt: "markdown 표기 샘플 입니다."
+author: Tester
+author_profile: false
 toc: true #heading 리스트 사이즈 바
 toc_sticky: true #heading 리스트 사이즈 바 유지
 categories:
   - vertica_etc
 tags:
   - markdown
-author: Tester
 ---
 
 <script type="application/javascript">
