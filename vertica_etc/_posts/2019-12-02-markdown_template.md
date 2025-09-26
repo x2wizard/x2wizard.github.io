@@ -7,6 +7,7 @@ categories:
   - vertica_etc
 tags:
   - markdown
+author: Tester
 ---
 
 <script type="application/javascript">
