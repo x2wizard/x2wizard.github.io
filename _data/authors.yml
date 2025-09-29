@@ -1,0 +1,15 @@
+# _data/authors.yml 예시
+
+myname: # 이 키를 포스트 YAML Front Matter에서 사용합니다. (예: author: myname)
+  name: x2wizard
+#  avatar: "/assets/images/bio-photo.jpg" # 프로필 이미지 경로
+  bio: "welcome to vertica"
+#  links:
+#    - label: "Email"
+#      icon: "fas fa-fw fa-envelope-square"
+#      url: "mailto:myname@example.com"
+
+another_author: # 다중 작성자를 위한 또 다른 키
+  name: Tester
+  bio: "Tester입니다."
+  # 다른 정보 (avatar, links 등) 추가 가능

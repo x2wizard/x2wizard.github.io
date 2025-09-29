@@ -47,8 +47,9 @@ On-Premise, 클라우드, VM 환경들에서 구성 가능
 
 **Eon mode**
 컴퓨팅 엔진과 스토리지가 분리되어 동적인 워크로드 요구에 빠르게 대응할 수 있도록 필요한 컴퓨팅 리소스만 확장/축소가 가능한 아키텍처  
-클라우드 환경에서는 Amazon Web Service에서 지원 가능하며, 추후 Microsoft Azure, Google Cloud에서도 지원될 예정  
-On-Premise 환경에서는 Pure Storage의 object storage에서 지원가능. 점진적으로 S3를 지원하는 Object Storage 벤더들을 지원할 예정(Certification Kit제공을 통해)  
+클라우드 환경에서는 Amazon Web Service, Microsoft Azure, Google Cloud에서 구성 가능
+On-Premise 환경에서는 스토리지로 Pure Storage FlashBlade, Minio와 같은 S3-compatible object storage를 사용해서 구성 가능
+
 
 
 
