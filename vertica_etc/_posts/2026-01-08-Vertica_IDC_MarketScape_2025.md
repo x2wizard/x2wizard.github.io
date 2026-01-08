@@ -13,7 +13,9 @@ tags:
 
 ## IDC MarketScape Worldwide Analytical Databases
 IDC MarketScape는 글로벌 시장 조사 기관인 IDC(International Data Corporation)가 특정 IT 산업 분야의 공급업체(Vendor)들을 평가하여 시각화한 분석 모델입니다.
-![IDC MarketScape Worldwide Analytical Databases Vendor Assessment](../img/Vertica_IDC_MarketScape_2025_00.gif)
+<p>
+<img src="../img/Vertica_IDC_MarketScape_2025_00.gif" style="width: 500px; height: auto;" alt="IDC MarketScape Worldwide Analytical Databases" />
+</p>
 
 '2025 IDC MarketScape Worldwide Analytical Databases' 분야에서 
 **Vertica 기술은 OpenText의 포트폴리오 내에서 OpenText Analytics Database(Vertica)** 라는 명칭으로 평가되고 있으며, 
