@@ -6,10 +6,11 @@ toc_sticky: true
 categories:
   - vertica_etc
 tags:
+  - vertica grafana
   - vertica
   - 버티카
-  - monitoring
-  - 모니터링
+  - vertica monitoring
+  - 버티카 모니터링
   - grafana
   - 그라파나
   - YJS

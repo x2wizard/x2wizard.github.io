@@ -8,7 +8,10 @@ categories:
 tags:
   - vertica
   - 버티카
-  - OpenText Analytics Database (Vertica)
+  - OpenText Analytics Database(Vertica)
+  - vertica IDC
+  - OpenText Analytics Database(Vertica) IDC
+  - OpenText Analytics Database IDC
 ---
 
 ## IDC MarketScape Worldwide Analytical Databases
