@@ -8,6 +8,7 @@ categories:
 tags:
   - vertica
   - 버티카
+  - OpenText Analytics Database(Vertica)
 ---
 
 # Vertica 소개

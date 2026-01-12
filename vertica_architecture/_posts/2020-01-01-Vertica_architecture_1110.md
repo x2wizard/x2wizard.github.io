@@ -12,6 +12,7 @@ tags:
   - resource pool
   - 리소스 관리
   - 리소스 풀
+  - OpenText Analytics Database(Vertica)
 ---
 
 ## resource management

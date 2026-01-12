@@ -12,6 +12,7 @@ tags:
   - restore
   - 백업
   - 복원
+  - OpenText Analytics Database(Vertica)
 ---
 
 ## 백업 및 복원

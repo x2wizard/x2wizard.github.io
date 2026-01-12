@@ -6,7 +6,8 @@ excerpt: "Vertica Q&A는 메일로 문의해 주세요"
 categories:
   - vertica_etc
 tags:
-  - Q&A
+  - Vertica Q&A
+  - OpenText Analytics Database(Vertica)
 ---
 
 ## 버티카 Q&A

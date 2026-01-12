@@ -14,6 +14,7 @@ tags:
   - 파티션 푸르닝
   - Hierarchical Partitioning
   - 파티션 그룹핑
+  - OpenText Analytics Database(Vertica)
 ---
 
 ## Partition VS Segmentation

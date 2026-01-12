@@ -14,6 +14,7 @@ tags:
   - TM
   - moveout
   - mergeout
+  - OpenText Analytics Database(Vertica)
 ---
 
 
