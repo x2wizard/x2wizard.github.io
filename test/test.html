@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>충남 직업계고 직업 블랙빙고 & 진로 내비게이션</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:#f8f8f6;color:#1a1a1a;min-height:100vh}
+.header{background:#fff;border-bottom:1px solid #e5e5e5;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header-title{font-size:16px;font-weight:700;color:#1a1a1a}
+.header-sub{font-size:12px;color:#888;margin-top:1px}
+.stats-row{display:flex;gap:8px}
+.stat{padding:4px 12px;background:#f4f4f0;border-radius:20px;font-size:12px;color:#666;text-align:center}
+.stat strong{font-size:16px;font-weight:700;color:#1a1a1a;display:block;line-height:1.2}
+.tabs{display:flex;gap:0;border-bottom:1px solid #e5e5e5;background:#fff;position:sticky;top:57px;z-index:99;overflow-x:auto;white-space:nowrap}
+.tab{flex:1;min-width:110px;padding:12px 4px;border:none;background:transparent;font-size:12px;font-weight:500;color:#999;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;text-align:center}
+.tab.on{color:#534AB7;border-bottom-color:#534AB7;font-weight:700}
+.content{padding:16px;max-width:700px;margin:0 auto}
+.pn{display:none}.pn.show{display:block}
+
+/* ── 탭1: 직업 카드 풀 ── */
+.pool-intro{font-size:13px;color:#666;margin-bottom:12px;padding:10px 14px;background:#EEEDFE;border-radius:10px;border-left:3px solid #534AB7;line-height:1.6}
+.pool-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:16px}
+.jc{padding:12px 4px;border-radius:10px;border:1px solid #e5e5e5;background:#fff;text-align:center;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;user-select:none;aspect-ratio:1}
+.jc:hover{background:#f4f4f0;border-color:#ccc}
+.jc.on{background:#EEEDFE;border-color:#534AB7}
+.jc.called{background:#3C3489;border-color:#26215C}
+.jc.called .ji,.jc.called .jn{color:#CECBF6}
+.ji{font-size:24px;line-height:1;margin-bottom:2px}
+.jn{font-size:11px;font-weight:600;color:#1a1a1a;line-height:1.3}
+.jc.on .jn{color:#3C3489}
+
+.board-label{font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:4px}
+.board-sub{font-size:12px;color:#888;margin-bottom:10px}
+.bingo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px}
+.bc{aspect-ratio:1;border:1px solid #ddd;border-radius:10px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;padding:5px;transition:all .2s;text-align:center;position:relative;user-select:none}
+.bc:hover:not(.empty){background:#f4f4f0}
+.bc.empty{border-style:dashed;background:#f9f9f7;cursor:default}
+.bc.mk{background:#3C3489;border-color:#26215C}
+.bc.mk .bi,.bc.mk .bn{color:#CECBF6}
+.bc.bl{background:#534AB7;border-color:#3C3489}
+.bc.bl .bi,.bc.bl .bn{color:#fff}
+.bi{font-size:22px;margin-bottom:3px}
+.bn{font-size:11px;font-weight:600;color:#1a1a1a;line-height:1.2}
+.bc.empty .bi{font-size:14px;color:#ddd}
+.act-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.btn{padding:8px 16px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:13px;color:#555;cursor:pointer;transition:all .15s;font-weight:500}
+.btn:hover{background:#f4f4f0}
+.btn.pri{background:#EEEDFE;border-color:#534AB7;color:#3C3489}
+.btn.pri:hover{background:#DDD9FC}
+.btn.go{background:#534AB7;border-color:#3C3489;color:#fff}
+.btn.go:hover{background:#3C3489}
+
+/* ── 탭2: 게임 ── */
+.caller-box{background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:16px;margin-bottom:14px;text-align:center}
+.cl-lbl{font-size:11px;color:#999;margin-bottom:6px}
+.cl-job{font-size:28px;font-weight:700;color:#1a1a1a;min-height:38px;line-height:1.3;margin-bottom:6px}
+.cl-prog{font-size:11px;color:#aaa;margin-bottom:12px}
+.bingo-res{display:none;padding:10px 16px;border-radius:10px;text-align:center;font-size:14px;font-weight:600;margin-bottom:10px}
+.bingo-res.show{display:block}
+.bingo-res.r1{background:#E1F5EE;color:#085041}
+.bingo-res.r2{background:#EAF3DE;color:#3B6D11}
+.bingo-res.r3{background:#EEEDFE;color:#3C3489}
+.next-bridge{background:#E1F5EE;border:1px solid #5DCAA5;border-radius:12px;padding:14px 16px;text-align:center;margin-top:10px}
+.nb-title{font-size:14px;font-weight:600;color:#085041;margin-bottom:4px}
+.nb-sub{font-size:12px;color:#0F6E56;margin-bottom:10px;line-height:1.5}
+
+/* ── 탭3: 학교 찾기 ── */
+.finder-intro{font-size:13px;color:#666;line-height:1.7;padding:10px 14px;background:#f4f4f0;border-radius:10px;margin-bottom:14px}
+.job-pick-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:14px}
+.jp{padding:10px 4px;border-radius:10px;border:1px solid #e5e5e5;background:#fff;text-align:center;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;aspect-ratio:1}
+.jp:hover{background:#f4f4f0}
+.jp.on{background:#E1F5EE;border-color:#1D9E75}
+.jp-i{font-size:22px;line-height:1;margin-bottom:2px}
+.jp-n{font-size:11px;font-weight:600;color:#1a1a1a;line-height:1.3}
+.jp.on .jp-n{color:#085041}
+.res-count{font-size:13px;font-weight:700;color:#534AB7;padding:4px 0;margin-bottom:8px}
+.res-list{display:flex;flex-direction:column;gap:10px}
+.sc-card{padding:14px 16px;border-radius:12px;border:1px solid #e5e5e5;background:#fff;transition:border-color .15s}
+.sc-card:hover{border-color:#5DCAA5}
+.sc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.sc-nm{font-size:14px;font-weight:600;color:#1a1a1a}
+.sc-reg{font-size:11px;padding:4px 8px;border-radius:8px;background:#E6F1FB;color:#0C447C;flex-shrink:0;white-space:nowrap;font-weight:600}
+.sc-dept{font-size:13px;font-weight:600;color:#0F6E56;margin-bottom:4px}
+.sc-desc{font-size:12px;color:#666;line-height:1.6}
+.sc-addr{font-size:11px;color:#aaa;margin-top:5px}
+.res-empty{padding:24px;text-align:center;font-size:13px;color:#999;background:#f9f9f7;border-radius:10px}
+
+/* ── 탭4: 주제어 찾기 ── */
+.kw-pool-container{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:14px;margin-bottom:16px}
+.kw-pool-title{font-size:13px;font-weight:700;color:#534AB7;margin-bottom:10px}
+.kw-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:480px;overflow-y:auto;padding-right:4px}
+.kw-btn{padding:6px 12px;border:1px solid #e5e5e5;border-radius:20px;background:#f9f9f7;font-size:12px;color:#555;cursor:pointer;transition:all .15s;font-weight:500}
+.kw-btn:hover{background:#EEEDFE;border-color:#534AB7;color:#3C3489}
+.kw-btn.on{background:#534AB7;border-color:#3C3489;color:#fff;font-weight:600}
+
+/* ── 탭5: 지역별 지도 ── */
+.map-layout { display:flex; flex-direction:column; gap:16px; margin-bottom: 20px;}
+.map-container { background:#fff; padding:10px; border-radius:12px; border:1px solid #e5e5e5; position:relative; overflow:hidden; width:100%; aspect-ratio:1.2; box-shadow: 0 4px 12px rgba(0,0,0,0.03);}
+.region-poly { fill:#fdfdfd; stroke:#ccc; stroke-width:1px; cursor:pointer; transition:all 0.2s ease; }
+.region-poly:hover { fill:#EEEDFE; }
+.region-poly.active { fill:#DDD9FC; stroke:#534AB7; stroke-width:2px; paint-order:stroke; }
+.region-label { font-size:12px; font-weight:700; fill:#555; text-anchor:middle; dominant-baseline:middle; pointer-events:none; text-shadow:-1.5px -1.5px 0 #fff, 1.5px -1.5px 0 #fff, -1.5px 1.5px 0 #fff, 1.5px 1.5px 0 #fff; }
+.region-label.active-label { fill:#3C3489; font-size:14.5px; font-weight:800; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">충남 직업계고 진로 통합 시스템</div>
+    <div class="header-sub">38개 학교 탐색 진로 플랫폼</div>
+  </div>
+  <div class="stats-row">
+    <div class="stat"><strong id="st-sel">0</strong>선택</div>
+    <div class="stat"><strong id="st-bingo">0</strong>빙고</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" id="t0" onclick="goTab(0)">① 빙고판 만들기</button>
+  <button class="tab" id="t1" onclick="goTab(1)">② 게임 시작</button>
+  <button class="tab" id="t2" onclick="goTab(2)">③ 직업으로 학교 찾기</button>
+  <button class="tab" id="t3" onclick="goTab(3)">④ 주제어로 학교 찾기</button>
+  <button class="tab" id="t4" onclick="goTab(4)">⑤ 지역별 학교 찾기</button>
+</div>
+
+<div class="content">
+
+<!-- ── TAB 0 ── -->
+<div class="pn show" id="ph0">
+  <div class="pool-intro">
+    아래 25개 직업 중 <strong>16개</strong>를 골라 빙고판을 채워요.<br>
+    관심 있는 직업을 직접 고르거나, 랜덤으로 채울 수도 있어요!
+  </div>
+  <div class="pool-grid" id="pool0"></div>
+  <div class="board-label">내 빙고판 <span id="fill-cnt" style="font-weight:400;font-size:12px;color:#888">— 0/16 채움</span></div>
+  <div class="board-sub">직업 카드를 눌러 빙고판에 추가하거나 아래서 바로 빼요</div>
+  <div class="bingo-grid" id="bgrid0"></div>
+  <div class="act-row">
+    <button class="btn pri" onclick="autoFill()">🎲 랜덤으로 채우기</button>
+    <button class="btn" onclick="clearBoard()">↺ 초기화</button>
+    <button class="btn go" onclick="goTab(1)" style="margin-left:auto">게임 시작 →</button>
+  </div>
+</div>
+
+<!-- ── TAB 1 ── -->
+<div class="pn" id="ph1">
+  <div class="caller-box">
+    <div class="cl-lbl">선생님이 부르는 직업</div>
+    <div class="cl-job" id="cl-job">▶ 버튼을 눌러 시작!</div>
+    <div class="cl-prog" id="cl-prog">0 / 25 호명</div>
+    <div style="display:flex;justify-content:center">
+      <button class="btn go" id="call-btn" onclick="callNext()">▶ 다음 직업 호명</button>
+    </div>
+  </div>
+  <div class="board-label" style="margin-bottom:4px">내 빙고판</div>
+  <div class="board-sub">불린 직업이 내 판에 있으면 눌러요! (아직 안 불린 건 눌러도 표시 안 돼요)</div>
+  <div class="bingo-grid" id="bgrid1"></div>
+  <div class="bingo-res" id="bingo-res"></div>
+  <div class="next-bridge">
+    <div class="nb-title">이 직업을 배우는 충남 학교를 찾아볼까요?</div>
+    <div class="nb-sub">빙고판에서 골랐던 직업들로 충남 직업계고 학교를 찾아볼 수 있어요</div>
+    <button class="btn go" onclick="goTab(2)">🏫 내 직업 배우는 학교 찾기 →</button>
+  </div>
+</div>
+
+<!-- ── TAB 2 ── -->
+<div class="pn" id="ph2">
+  <div class="finder-intro">
+    관심 있는 직업을 눌러보세요!<br>
+    충남에서 그 직업을 배울 수 있는 <strong>학교와 학과</strong>를 바로 알려드려요.
+  </div>
+  <div class="job-pick-grid" id="job-picker"></div>
+  <div class="res-count" id="res-count"></div>
+  <div class="res-list" id="res-list">
+    <div class="res-empty">위에서 관심 있는 직업을 눌러보세요!</div>
+  </div>
+</div>
+
+<!-- ── TAB 3: 주제어로 찾기 ── -->
+<div class="pn" id="ph3">
+  <div class="finder-intro">
+    💡 학생들이 일상에서 관심 있어 하는 <strong>100가지 친숙한 단어(주제어)</strong>로 융합 탐색을 해요!<br>
+    단어를 선택하면 상업·공업·농생명 계열의 벽을 깨고 연관된 모든 학과를 다각도로 추천해 드려요.
+  </div>
+
+  <div class="kw-pool-container">
+    <div class="kw-pool-title">🔮 관심사 태그를 터치해보세요 (가나다순 100선)</div>
+    <div class="kw-grid" id="keyword-pool"></div>
+  </div>
+
+  <div class="res-count" id="res-count-k"></div>
+  <div class="res-list" id="res-list-k">
+    <div class="res-empty">상단의 추천 주제어 태그를 클릭하여 매칭되는 학교를 탐색해보세요!</div>
+  </div>
+</div>
+
+<!-- ── TAB 4: 지역별 찾기 ── -->
+<div class="pn" id="ph4">
+  <div class="finder-intro">
+    지도에서 <strong>시·군을 클릭</strong>하시면 해당 지역의 직업계고 현황을 확인할 수 있습니다.
+  </div>
+  <div class="map-layout">
+    <div class="map-container" id="map-display">
+      <div id="loading-text" style="position:absolute; top:45%; left:0; width:100%; text-align:center; font-size:13px; font-weight:bold; color:#534AB7;">
+        📡 지도를 불러오는 중입니다...
+      </div>
+    </div>
+    <div id="map-list-container">
+      <div class="res-empty">🗺️ <b>위 지도에서 지역을 클릭하세요!</b><br>해당 구역의 직업계고 데이터가 표시됩니다.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+// ==========================================
+// 1. 25개 직업군 데이터
+// ==========================================
+var JOBS=[
+  {n:"경찰·소방·안전 요원",       i:"🚨"},
+  {n:"군인·부사관",               i:"🪖"},
+  {n:"소프트웨어·AI 개발자",      i:"💻"},
+  {n:"전기·전자 기술자",          i:"⚡"},
+  {n:"반도체 엔지니어",           i:"🔬"},
+  {n:"항공·드론 전문가",           i:"🚁"},
+  {n:"가수·공연 아티스트",        i:"🎤"},
+  {n:"자동차·중장비 정비사",     i:"🚗"},
+  {n:"로봇·자동화 시스템 운영자", i:"🤖"},
+  {n:"기계·용접 기술자",          i:"🔧"},
+  {n:"건설·건축·조경 기술자",     i:"🏗️"},
+  {n:"선박·해양 기술자",          i:"⚓"},
+  {n:"화학·에너지·환경 기술자",   i:"🧪"},
+  {n:"헤어·뷰티 디자이너",        i:"✂️"},
+  {n:"조리사·셰프·파티시에",      i:"👨‍🍳"},
+  {n:"바이오·헬스케어 품질관리사",i:"🧬"},
+  {n:"영상·콘텐츠·디자인 크리에이터",i:"🎬"},
+  {n:"회계·세무·경영 사무원",     i:"📊"},
+  {n:"물류·유통·무역 관리자",     i:"📦"},
+  {n:"관광·호텔 서비스",          i:"✈️"},
+  {n:"간호조무사·보건 의료인",    i:"🏥"},
+  {n:"마케팅·e커머스 전문가",     i:"🌐"},
+  {n:"금융·데이터 분석가",        i:"📈"},
+  {n:"스마트팜·도시농업 전문가",   i:"🌱"},
+  {n:"반려동물·축산 전문가",      i:"🐶"}
+];
+
+// ==========================================
+// 2. 학교 및 학과 매칭 데이터
+// ==========================================
+var SCHOOL_DATA={
+  "경찰·소방·안전 요원":[
+    {school:"강경상업고등학교",region:"논산시",dept:"경찰사무행정과",desc:"경찰학개론, 형사법 등 전문 지식을 습득하여 경찰공무원(순경)으로 종사할 전문가 양성",addr:"충청남도 논산시"},
+    {school:"공주정보고등학교",region:"공주시",dept:"소방안전과",desc:"국민의 생명과 재산을 보호하기 위해 화재 예방, 경계, 진압을 수행하는 소방분야 전문가 양성",addr:"충청남도 공주시"}
+  ],
+  "군인·부사관":[
+    {school:"강경상업고등학교",region:"논산시",dept:"국방경영과",desc:"올바른 안보 의식을 바탕으로 장교, 군무원, 부사관 업무에 종사할 전문 인력 양성",addr:"충청남도 논산시"},
+    {school:"서산공업고등학교",region:"서산시",dept:"공정수송기술과",desc:"국방부에서 지정한 전문 기술부사관 양성과정으로 입대 전에 특수 분야 기술병을 양성",addr:"충청남도 서산시"},
+    {school:"연무마이스터고등학교",region:"논산시",dept:"미래자동차전기전자과",desc:"군 특성화(육군, 해병대) 과정 운영으로 무시험 부사관 임관이 가능한 현장 전문 인력 양성",addr:"충청남도 논산시"}
+  ],
+  "소프트웨어·AI 개발자":[
+    {school:"천안상업고등학교",region:"천안시",dept:"소프트웨어개발과",desc:"4차 산업혁명시대에 필요한 소프트웨어개발자와 웹프로그래머를 양성",addr:"충청남도 천안시"}
+  ],
+  "전기·전자 기술자":[
+    {school:"공주마이스터고등학교",region:"공주시",dept:"전기전자과",desc:"PLC, 임베디드SW를 사용하고 생산자동화시스템을 운용할 창의적인 영마이스터 양성",addr:"충청남도 공주시"},
+    {school:"금산산업고등학교",region:"금산군",dept:"바이오스마트테크과",desc:"자동화설비 기술을 활용하여 4차산업혁명의 인공지능 활용 전기전자설비 인력 양성",addr:"충청남도 금산군"},
+    {school:"금산하이텍고등학교",region:"금산군",dept:"전기시스템제어과",desc:"전기 내선공사, 자동제어, 전력수급 등 실무를 통해 유능한 전기기술인 양성",addr:"충청남도 금산군"},
+    {school:"부여전자고등학교",region:"부여군",dept:"전자과",desc:"반도체 생산 관련 자동화 설비 운용 및 생산 장비 제작 관련 실무 능력을 갖춘 전문 기술자 양성",addr:"충청남도 부여군"},
+    {school:"천안공업고등학교",region:"천안시",dept:"전기과",desc:"전력수급계통, 전기기기 운용 및 자동제어 실무를 수행할 수 있는 기술인 육성",addr:"충청남도 천안시"}
+  ],
+  "반도체 엔지니어":[
+    {school:"충남반도체마이스터고등학교",region:"예산군",dept:"반도체융합과",desc:"반도체 공정 장비 제조 및 유지 보수 등 산업수요와 연계해 반도체 직무 역량을 갖춘 기술인재 양성",addr:"충청남도 예산군"}
+  ],
+  "항공·드론 전문가":[
+    {school:"국방항공고등학교",region:"논산시",dept:"항공기계과",desc:"항공기 기체 정비 및 항공 부품 가공 분야의 실무형 우수 인재 육성",addr:"충청남도 논산시"},
+    {school:"국방항공고등학교",region:"논산시",dept:"항공전기전자과",desc:"항공전기전자분야, 자동화설비, 전기설비, 전자제품 및 부품생산 인재 양성",addr:"충청남도 논산시"},
+    {school:"국방항공고등학교",region:"논산시",dept:"지형공간디자인과",desc:"공간정보 기술, 도시 설계, 드론 및 측량, 건축분야, 토목분야 인재 양성",addr:"충청남도 논산시"},
+    {school:"충남드론항공고등학교",region:"홍성군",dept:"드론비즈과",desc:"드론 영상 제작, 방제, 공간정보 등 드론 활용 기술을 기반으로 비즈니스 역량을 함양한 융합형 인재 양성",addr:"충청남도 홍성군"},
+    {school:"충남드론항공고등학교",region:"홍성군",dept:"드론테크과",desc:"3D 프린팅과 코딩 기반의 드론 제작 및 정비, 임무장비 운용 기술을 습득한 핵심 인재 양성",addr:"충청남도 홍성군"}
+  ],
+  "가수·공연 아티스트":[
+    {school:"한국 K-POP고등학교",region:"홍성군",dept:"K-POP공연예술과",desc:"K-POP 글로벌 시장 확대에 따른 산업 수요를 반영하여 문화예술 전문 인력을 양성",addr:"충청남도 홍성군"}
+  ],
+  "자동차·중장비 정비사":[
+    {school:"서산공업고등학교",region:"서산시",dept:"자동차과",desc:"자동차 정비(엔진, 전기전자장치, 섀시) 및 건설기계, 특수건설장비 운용 인재 양성",addr:"충청남도 서산시"},
+    {school:"연무마이스터고등학교",region:"논산시",dept:"미래자동차부품가공과",desc:"미래형 완성차 및 친환경 자동차의 부품을 설계, 가공, 제작할 수 있는 현장 전문 인력 양성",addr:"충청남도 논산시"},
+    {school:"주산산업고등학교",region:"보령시",dept:"자동차기계과",desc:"기계가공 및 설계이론을 습득하여 자동차 정비·검사 업무에 종사할 기술자 양성",addr:"충청남도 보령시"}
+  ],
+  "로봇·자동화 시스템 운영자":[
+    {school:"아산스마트팩토리마이스터고등학교",region:"아산시",dept:"스마트팩토리과",desc:"사물인터넷과 인공지능을 결합하여 생산효율을 내는 스마트팩토리 영마이스터 양성",addr:"충청남도 아산시"},
+    {school:"천안공업고등학교",region:"천안시",dept:"메카트로닉스과",desc:"기계-전자기술과 자동화 제어를 위한 전자회로, PLC제어 등을 공부하여 생산시스템 운용 능력 육성",addr:"충청남도 천안시"},
+    {school:"합덕제철고등학교",region:"당진시",dept:"철강로봇융합과",desc:"산업용 로봇 제어 및 디지털 트윈, AI 기반 제조 응용 능력을 함양한 기능 인력 양성",addr:"충청남도 당진시"}
+  ],
+  "기계·용접 기술자":[
+    {school:"공주생명과학고등학교",region:"공주시",dept:"산업기계설비과",desc:"농기계 정비, 운전, 전기, 용접 등에 관한 지식과 기술을 습득하여 산업기계 정비원 양성",addr:"충청남도 공주시"},
+    {school:"금산하이텍고등학교",region:"금산군",dept:"스마트기계과",desc:"CAD/CAM 활용, 공압, PLC 제어 및 특수용접 실습으로 현장실무 능력을 갖춘 인재 양성",addr:"충청남도 금산군"},
+    {school:"서산공업고등학교",region:"서산시",dept:"정밀기계과",desc:"CNC선반 등 기계장비 운영기술과 전기용접, 특수용접 분야 기술을 습득한 인재 양성",addr:"충청남도 서산시"},
+    {school:"천안공업고등학교",region:"천안시",dept:"기계과",desc:"기계가공, 용접, 기계설계 등 현장에서 요구되는 실무를 수행할 수 있는 뿌리산업 기술 인재 양성",addr:"충청남도 천안시"}
+  ],
+  "건설·건축·조경 기술자":[
+    {school:"서산중앙고등학교",region:"서산시",dept:"생태경관디자인과",desc:"원예와 조경산업 지식을 습득하여 스마트팜, 생태경관 조성 전문 직무를 수행하는 창의적 인재 양성",addr:"충청남도 서산시"},
+    {school:"주산산업고등학교",region:"보령시",dept:"건설시스템과",desc:"교량, 고속도로, 항만 및 아파트 건축 시공 등 국가기간산업의 건설 전문 기술인 양성",addr:"충청남도 보령시"},
+    {school:"천안공업고등학교",region:"천안시",dept:"건축디자인과",desc:"건축물 설계, 인테리어 시공, 리모델링 등의 전문적인 지식과 기술을 갖춘 전문기술인 육성",addr:"충청남도 천안시"},
+    {school:"천안공업고등학교",region:"천안시",dept:"도시공간건설과",desc:"토목설계제도, 측량, 재료시공, 지도제작, 도시계획 및 설계 전문가 양성",addr:"충청남도 천안시"}
+  ],
+  "선박·해양 기술자":[
+    {school:"충남해양과학고등학교",region:"보령시",dept:"동력제어시스템과",desc:"선박 기기 운용, 보조기계 정비 등 선박 기관과 전기에 관련된 기계 실무 기술자 양성",addr:"충청남도 보령시"},
+    {school:"충남해양과학고등학교",region:"보령시",dept:"해양산업운항과",desc:"항해, 선박통신, 잠수, 승선실습을 통해 해양 관련 산업에 진출할 전문 기술자 양성",addr:"충청남도 보령시"}
+  ],
+  "화학·에너지·환경 기술자":[
+    {school:"장항공업고등학교",region:"서천군",dept:"신재생에너지과",desc:"태양광, 연료전지 등 에너지 산업 분야에서 요구되는 신재생에너지 전기전자 설비 운용자 양성",addr:"충청남도 서천군"},
+    {school:"천안공업고등학교",region:"천안시",dept:"화학공업과",desc:"화학제품의 제조, 실험 분석, 화학장치 응용분야에 종사할 수 있는 기술인 육성",addr:"충청남도 천안시"},
+    {school:"충남해양과학고등학교",region:"보령시",dept:"냉동공조과",desc:"냉동 공조 장치 설치, 설계 등 냉난방 관련 산업에 진출할 기술인 양성",addr:"충청남도 보령시"}
+  ],
+  "헤어·뷰티 디자이너":[
+    {school:"논산여자상업고등학교",region:"논산시",dept:"뷰티미용과",desc:"헤어미용, 피부미용, 네일아트 등 현장 실무 능력을 갖춘 미용인 양성",addr:"충청남도 논산시"},
+    {school:"병천고등학교",region:"천안시",dept:"미용과",desc:"헤어미용, 피부미용, 메이크업 등 실기 능력을 습득하여 산업 발전에 기여할 전문 미용인 양성",addr:"충청남도 천안시"},
+    {school:"한국미래문화고등학교",region:"서천군",dept:"뷰티디자인과",desc:"미용 산업 관련 자격증 취득 및 심화 교육을 통하여 현장 실무역량을 갖춘 토탈뷰티 인재 양성",addr:"충청남도 서천군"}
+  ],
+  "조리사·셰프·파티시에":[
+    {school:"공주생명과학고등학교",region:"공주시",dept:"식품가공과",desc:"식품가공, 제과제빵, 한식 및 양식 조리 등 식품 전문 인재 양성",addr:"충청남도 공주시"},
+    {school:"논산여자상업고등학교",region:"논산시",dept:"조리과",desc:"한식, 양식, 중식, 제과, 제빵 분야 전문 인재 양성",addr:"충청남도 논산시"},
+    {school:"병천고등학교",region:"천안시",dept:"조리과",desc:"한국, 서양, 중식, 일식 조리 및 제과제빵 등 조리 전문 인력 양성",addr:"충청남도 천안시"},
+    {school:"서산중앙고등학교",region:"서산시",dept:"식품가공과",desc:"식품가공기술, 제과제빵, 한식조리 등 식음료 분야 전문 기술인 양성",addr:"충청남도 서산시"},
+    {school:"예산예화여자고등학교",region:"예산군",dept:"글로벌외식조리과",desc:"국제적 감각을 갖춘 글로벌 마스터 셰프 및 제과 제빵 전문 인재 양성",addr:"충청남도 예산군"},
+    {school:"주산산업고등학교",region:"보령시",dept:"식품제조과",desc:"제과 제빵 기능 및 조리 기능 습득을 통한 식품 제조 전문 기술인 양성",addr:"충청남도 보령시"}
+  ],
+  "바이오·헬스케어 품질관리사":[
+    {school:"국방항공고등학교",region:"논산시",dept:"바이오제약과",desc:"화학, 바이오, 환경 관련 신산업 분야 전문 인력 및 품질분석 기술 인재 양성",addr:"충청남도 논산시"},
+    {school:"금산하이텍고등학교",region:"금산군",dept:"식품제조공정과",desc:"식품 제조 기술 및 화학 제품의 제조 원리, 분석 기술을 습득하여 생산 공정을 관리하는 인재 양성",addr:"충청남도 금산군"},
+    {school:"천안제일고등학교",region:"천안시",dept:"바이오식품과",desc:"바이오의약품 제조 공정 및 건강기능식품 생산, 위생관리, 품질관리 전문 기술 인재 양성",addr:"충청남도 천안시"},
+    {school:"한국식품마이스터고등학교",region:"부여군",dept:"식품제조공정과",desc:"농·축·수산물을 원료로 한 가공 식품 및 건강기능식품의 제조 공정관리 직무를 수행할 수 있는 기술인 양성",addr:"충청남도 부여군"},
+    {school:"한국식품마이스터고등학교",region:"부여군",dept:"식품품질관리과",desc:"건강기능식품의 품질관리, 품질개선, 품질혁신의 직무를 수행할 수 있는 기술인 양성",addr:"충청남도 부여군"}
+  ],
+  "영상·콘텐츠·디자인 크리에이터":[
+    {school:"당진정보고등학교",region:"당진시",dept:"AI콘텐츠과",desc:"디자인 콘텐츠 분야와 마케팅을 융합하여 미디어 산업 부가가치를 창출하는 융합 인재 양성",addr:"충청남도 당진시"},
+    {school:"대천여자상업고등학교",region:"보령시",dept:"콘텐츠마케팅과",desc:"디지털 플랫폼 활용 콘텐츠 제작 및 영상 촬영 능력을 지닌 마케팅 전문가 양성",addr:"충청남도 보령시"},
+    {school:"예산예화여자고등학교",region:"예산군",dept:"디지털영상과",desc:"미디어 콘텐츠 제작, 영상 편집 기술을 다루는 영상 전문인력 양성",addr:"충청남도 예산군"},
+    {school:"천안상업고등학교",region:"천안시",dept:"광고미디어디자인과",desc:"영상제작, 애니메이션 및 시각디자인 등 광고미디어 콘텐츠 전문가 양성",addr:"충청남도 천안시"},
+    {school:"태안여자고등학교",region:"태안군",dept:"미디어콘텐츠과",desc:"마케팅, 기획, 디자인 개발 능력을 겸비한 스마트한 미디어 콘텐츠 전문가 양성",addr:"충청남도 태안군"},
+    {school:"한국미래문화고등학교",region:"서천군",dept:"융합미디어과",desc:"영상제작, 방송 및 영화 콘텐츠 제작, 광고 디자인 등 융합미디어 전문가 육성",addr:"충청남도 서천군"}
+  ],
+  "회계·세무·경영 사무원":[
+    {school:"강경상업고등학교",region:"논산시",dept:"전산회계정보과",desc:"전산회계, 전산세무 등 세무회계 분야의 핵심 역량을 갖춘 사무 전문 인력 양성",addr:"충청남도 논산시"},
+    {school:"당진정보고등학교",region:"당진시",dept:"회계사무과",desc:"경영 전반에 필요한 지식과 자질을 겸비하고, 회계 이론과 실무 능력을 갖춘 사무 전문 인력 양성",addr:"충청남도 당진시"},
+    {school:"대천여자상업고등학교",region:"보령시",dept:"세무에셋과",desc:"세무 회계 변화를 예측할 수 있는 자질과 금융 및 부동산 지식을 함양한 세무 금융 전문가 양성",addr:"충청남도 보령시"},
+    {school:"부여정보고등학교",region:"부여군",dept:"금융회계과",desc:"회계, 세무, 금융 및 예산 자금 실무 능력을 지닌 창의적인 상업 인재 양성",addr:"충청남도 부여군"},
+    {school:"삽교고등학교",region:"예산군",dept:"사무행정과",desc:"직무 중심 교육을 통해 기업 학내 정보화 및 사무 행정 업무를 충실히 수행하는 전문인 육성",addr:"충청남도 예산군"},
+    {school:"천안상업고등학교",region:"천안시",dept:"사무회계과",desc:"회계정보처리, 상업경제 등 경영·사무 실무 능력을 갖춘 회계 사무원 양성",addr:"충청남도 천안시"},
+    {school:"천안여자상업고등학교",region:"천안시",dept:"비즈니스플랫폼과",desc:"글로벌 ERP 기업과 연계하여 정보처리 및 회계 관련 지식과 실무를 갖춘 플랫폼 전문가 양성",addr:"충청남도 천안시"}
+  ],
+  "물류·유통·무역 관리자":[
+    {school:"천안여자상업고등학교",region:"천안시",dept:"유통플랫폼과",desc:"글로벌 기업과 연계하여 유통, 수출 및 국제 무역 관련 지식과 실무 능력을 갖춘 전문가 양성",addr:"충청남도 천안시"},
+    {school:"한올고등학교",region:"아산시",dept:"국제통상외국어과",desc:"외국어 능력과 사무 능력을 함양하여 수출입관리 사무원 등 국제 통상 실무 인재 양성",addr:"충청남도 아산시"}
+  ],
+  "관광·호텔 서비스":[
+    {school:"논산여자상업고등학교",region:"논산시",dept:"관광비즈니스과",desc:"호텔, 리조트 서비스 산업 분야의 리더를 양성하기 위한 관광 비즈니스 전문가 육성",addr:"충청남도 논산시"},
+    {school:"충남관광보건고등학교",region:"천안시",dept:"관광경영과",desc:"여행사, 항공사, 카지노, 외식업계 등 관광 서비스 산업 전반에 대한 글로벌 전문가 양성",addr:"충청남도 천안시"}
+  ],
+  "간호조무사·보건 의료인":[
+    {school:"공주정보고등학교",region:"공주시",dept:"보건간호과",desc:"건강증진과 생명존중을 실천하며 임상실습 교육을 통과한 현장맞춤형 전문 보건 간호인 육성",addr:"충청남도 공주시"},
+    {school:"충남관광보건고등학교",region:"천안시",dept:"보건간호과",desc:"고등학교 재학 중 간호조무사 자격을 취득하여 보건 의료 전반에 대한 현장맞춤형 전문가 양성",addr:"충청남도 천안시"}
+  ],
+  "마케팅·e커머스 전문가":[
+    {school:"한국국제비즈니스고등학교",region:"논산시",dept:"SNS마케팅과",desc:"마케팅 역량을 갖추고 유튜브 콘텐츠 제작 및 창업, 1인 미디어 시장 진출을 돕는 전문가 양성",addr:"충청남도 논산시"},
+    {school:"한국미래문화고등학교",region:"서천군",dept:"e-shop경영과",desc:"전자상거래 전문가 및 일반기업 사무직, 창업 등 다채로운 진로를 설계하는 마케팅 인재 제공",addr:"충청남도 서천군"}
+  ],
+  "금융·데이터 분석가":[
+    {school:"강경상업고등학교",region:"논산시",dept:"AI비즈니스과",desc:"인공지능과 빅데이터를 활용하여 데이터를 분석하고 비즈니스 가치를 창출하는 미래형 융합 인재 양성",addr:"충청남도 논산시"},
+    {school:"천안여자상업고등학교",region:"천안시",dept:"재무플랫폼과",desc:"경영, 재무, 금융 관련 지식과 실무를 바탕으로 능력있는 ERP 재무 및 데이터 금융 플랫폼 전문가 양성",addr:"충청남도 천안시"}
+  ],
+  "스마트팜·도시농업 전문가":[
+    {school:"금산산업고등학교",region:"금산군",dept:"그린바이오과",desc:"스마트농업, 육종 등 농생명 분야 기술을 습득하여 스마트팜 등 농산업 분야 창의적 인재 양성",addr:"충청남도 금산군"},
+    {school:"천안제일고등학교",region:"천안시",dept:"스마트팜과",desc:"스마트팜 설비 구축, 코딩 데이터 활용 및 작물 재배 전문 지식을 갖춘 융합형 농생명 전문가 양성",addr:"충청남도 천안시"}
+  ],
+  "반려동물·축산 전문가":[
+    {school:"공주생명과학고등학교",region:"공주시",dept:"축산자원개발과",desc:"한우, 돼지, 축산식품가공 지식을 습득하여 축산전문 경영인 및 축산물 가공원 양성",addr:"충청남도 공주시"},
+    {school:"천안제일고등학교",region:"천안시",dept:"반려동물과",desc:"동물 수의 보조, 애견 미용, 사양관리, 반려동물 행동교정 역량을 함양한 전문 인력 양성",addr:"충청남도 천안시"}
+  ]
+};
+
+// ==========================================
+// 3. 키워드 검색 매칭 데이터
+// ==========================================
+var KEYWORD_MAPPING = {
+  "코딩": ["소프트웨어개발과", "드론테크과", "드론비즈과", "스마트팩토리과"],
+  "개발": ["소프트웨어개발과", "반도체융합과", "스마트팩토리과", "정보통신과"],
+  "앱": ["소프트웨어개발과", "미디어콘텐츠과", "스마트팩토리과"],
+  "스마트폰": ["소프트웨어개발과", "미디어콘텐츠과", "전기전자과", "정보통신과"],
+  "게임": ["소프트웨어개발과", "광고미디어디자인과", "AI콘텐츠과"],
+  "인공지능": ["스마트팩토리과", "AI비즈니스과", "AI콘텐츠과", "소프트웨어개발과"],
+  "AI": ["스마트팩토리과", "AI비즈니스과", "AI콘텐츠과", "소프트웨어개발과"],
+  "메타버스": ["콘텐츠마케팅과", "미디어콘텐츠과", "디지털영상과"],
+  "VR": ["콘텐츠마케팅과", "미디어콘텐츠과", "융합미디어과"],
+  "해킹": ["소프트웨어개발과", "정보통신과"],
+  "서버": ["소프트웨어개발과", "스마트팩토리과", "정보통신과"],
+  "정보보안": ["소프트웨어개발과", "정보통신과"],
+  "컴퓨터": ["소프트웨어개발과", "스마트팩토리과", "전산회계정보과", "미디어콘텐츠과", "정보통신과"],
+  "빅데이터": ["소프트웨어개발과", "콘텐츠마케팅과", "AI비즈니스과", "비즈니스플랫폼과"],
+  "프로그래밍": ["소프트웨어개발과", "미디어콘텐츠과", "스마트팩토리과", "AI비즈니스과"],
+  "로봇": ["스마트팩토리과", "철강로봇융합과", "전기전자과", "메카트로닉스과"],
+  "기계": ["기계과", "스마트기계과", "산업기계설비과", "자동차기계과", "정밀기계과", "항공기계과"],
+  "조립": ["스마트팩토리과", "기계과", "항공기계과", "메카트로닉스과"],
+  "자동차": ["미래자동차부품가공과", "미래자동차전기전자과", "공정수송기술과", "자동차과", "자동차기계과"],
+  "전기차": ["미래자동차전기전자과", "신재생에너지과"],
+  "드론": ["드론테크과", "드론비즈과", "지형공간디자인과"],
+  "비행기": ["항공기계과", "항공전기전자과"],
+  "항공기": ["항공기계과", "항공전기전자과", "공정수송기술과"],
+  "항공": ["항공기계과", "항공전기전자과", "드론테크과"],
+  "엔진": ["공정수송기술과", "자동차기계과", "항공기계과", "자동차과"],
+  "3D프린터": ["메카트로닉스과", "드론테크과", "스마트기계과"],
+  "설계": ["기계과", "스마트기계과", "스마트팩토리과", "건축디자인과", "도시공간건설과", "정밀기계과"],
+  "배터리": ["신재생에너지과", "미래자동차전기전자과", "화학공업과"],
+  "엘리베이터": ["전기과", "전기시스템제어과"],
+  "철도": ["공정수송기술과", "전기과", "기계과"],
+  "반도체": ["반도체융합과", "전자과", "전기전자과"],
+  "유튜브": ["SNS마케팅과", "콘텐츠마케팅과", "디지털영상과"],
+  "크리에이터": ["콘텐츠마케팅과", "SNS마케팅과", "미디어콘텐츠과", "융합미디어과"],
+  "방송": ["디지털영상과", "미디어콘텐츠과", "융합미디어과"],
+  "영상": ["디지털영상과", "콘텐츠마케팅과", "미디어콘텐츠과", "광고미디어디자인과", "융합미디어과"],
+  "촬영": ["콘텐츠마케팅과", "디지털영상과", "드론테크과", "미디어콘텐츠과"],
+  "사진": ["콘텐츠마케팅과", "디지털영상과", "광고미디어디자인과"],
+  "디자인": ["광고미디어디자인과", "미디어콘텐츠과", "융합미디어과", "건축디자인과", "생태경관디자인과"],
+  "웹툰": ["광고미디어디자인과", "미디어콘텐츠과", "융합미디어과"],
+  "만화": ["광고미디어디자인과", "미디어콘텐츠과", "융합미디어과"],
+  "애니메이션": ["광고미디어디자인과", "미디어콘텐츠과"],
+  "이모티콘": ["광고미디어디자인과", "미디어콘텐츠과"],
+  "색깔": ["광고미디어디자인과", "융합미디어과", "건축디자인과"],
+  "무대": ["K-POP공연예술과", "건축디자인과", "미디어콘텐츠과"],
+  "K팝": ["K-POP공연예술과"],
+  "음악": ["K-POP공연예술과", "디지털영상과"],
+  "댄스": ["K-POP공연예술과"],
+  "빵": ["식품가공과", "조리과", "식품제조공정과", "바이오식품과", "글로벌외식조리과", "식품제조과"],
+  "디저트": ["식품가공과", "조리과", "글로벌외식조리과", "식품제조과"],
+  "요리": ["조리과", "글로벌외식조리과", "식품가공과", "식품제조과"],
+  "셰프": ["조리과", "글로벌외식조리과"],
+  "카페": ["식품가공과", "관광경영과", "관광비즈니스과"],
+  "커피": ["식품가공과", "관광경영과", "조리과", "관광비즈니스과"],
+  "고기": ["축산자원개발과", "식품제조과"],
+  "동물": ["반려동물과", "축산자원개발과"],
+  "강아지": ["반려동물과"],
+  "고양이": ["반려동물과"],
+  "식물": ["생태경관디자인과", "조경과", "그린바이오과"],
+  "농사": ["그린바이오과", "스마트팜과"],
+  "스마트팜": ["그린바이오과", "스마트팜과", "생태경관디자인과", "산업기계설비과"],
+  "자연보호": ["생태경관디자인과", "화학공업과"],
+  "바다": ["해양산업운항과", "동력제어시스템과"],
+  "환경": ["화학공업과", "신재생에너지과", "생태경관디자인과"],
+  "돈": ["AI비즈니스과", "전산회계정보과", "세무에셋과", "금융회계과", "사무회계과", "재무플랫폼과", "회계사무과"],
+  "부자": ["세무에셋과", "금융회계과", "재무플랫폼과", "회계사무과"],
+  "주식": ["세무에셋과", "재무플랫폼과", "금융회계과"],
+  "은행": ["AI비즈니스과", "금융회계과", "재무플랫폼과", "전산회계정보과"],
+  "세금": ["세무에셋과", "전산회계정보과", "사무행정과"],
+  "회계": ["전산회계정보과", "회계사무과", "금융회계과", "사무회계과", "재무플랫폼과"],
+  "마케팅": ["콘텐츠마케팅과", "SNS마케팅과", "AI콘텐츠과", "e-shop경영과"],
+  "쇼핑몰": ["사무행정과", "e-shop경영과", "유통플랫폼과"],
+  "창업": ["SNS마케팅과", "e-shop경영과", "관광경영과"],
+  "사무실": ["전산회계정보과", "사무행정과", "사무회계과", "회계사무과", "비즈니스플랫폼과"],
+  "비서": ["e-shop경영과", "사무행정과"],
+  "영업": ["유통플랫폼과", "국제통상외국어과", "스마트경영과"],
+  "무역": ["국제통상외국어과", "유통플랫폼과"],
+  "물류": ["유통플랫폼과", "유통물류과", "스마트경영과"],
+  "공기업": ["회계사무과", "금융회계과", "사무회계과", "전산회계정보과"],
+  "화장": ["미용과", "뷰티미용과", "뷰티디자인과"],
+  "메이크업": ["미용과", "뷰티디자인과", "뷰티미용과"],
+  "헤어": ["뷰티미용과", "미용과", "뷰티디자인과"],
+  "미용실": ["뷰티미용과", "미용과"],
+  "네일아트": ["뷰티미용과", "뷰티디자인과", "미용과"],
+  "피부": ["뷰티미용과", "미용과", "뷰티디자인과"],
+  "패션": ["융합미디어과", "광고미디어디자인과", "뷰티디자인과"],
+  "옷": ["융합미디어과"],
+  "인테리어": ["건축디자인과", "미디어콘텐츠과", "도시공간건설과"],
+  "웨딩": ["관광비즈니스과", "뷰티디자인과", "뷰티미용과"],
+  "공무원": ["경찰사무행정과", "소방안전과", "도시공간건설과", "사무행정과"],
+  "경찰": ["경찰사무행정과", "국방경영과"],
+  "소방관": ["소방안전과"],
+  "군인": ["국방경영과", "미래자동차전기전자과", "공정수송기술과", "항공기계과"],
+  "경호원": ["경찰사무행정과", "국방경영과"],
+  "간호사": ["보건간호과"],
+  "병원": ["보건간호과"],
+  "약": ["바이오제약과", "바이오식품과", "식품품질관리과"],
+  "바이오헬스": ["바이오제약과", "바이오식품과", "식품품질관리과", "식품제조공정과", "보건간호과"],
+  "집짓기": ["건축디자인과", "건설시스템과", "도시공간건설과"],
+  "전기": ["전기과", "항공전기전자과", "전기전자과", "전기시스템제어과", "바이오스마트테크과"],
+  "에어컨": ["냉동공조과"],
+  "목수": ["건축디자인과", "산업기계설비과"]
+};
+
+// ==========================================
+// 4. 지도 렌더링에 사용될 지역별 학교 데이터베이스 (5번 탭 용)
+// ==========================================
+const mapDatabase = {
+    "계룡시": [],
+    "논산시": [
+        { name: "강경상업고등학교", address: "충청남도 논산시 강경읍 계백로 220", depts: ["경찰사무행정과", "AI비즈니스과", "국방경영과", "전산회계정보과"] },
+        { name: "국방항공고등학교", address: "충청남도 논산시 시민로 365", depts: ["항공기계과", "항공전기전자과", "지형공간디자인과", "바이오제약과"] },
+        { name: "논산여자상업고등학교", address: "충남 논산시 강산동 53번지", depts: ["경영정보과", "뷰티미용과", "조리과", "관광비즈니스과"] },
+        { name: "연무마이스터고등학교", address: "충청남도 논산시 연무읍 연무로 268-9", depts: ["미래자동차금형과", "미래자동차부품가공과", "미래자동차전기전자과"] },
+        { name: "한국국제비즈니스고등학교", address: "충청남도 논산시 연산면 한전리 계백로 1958-16", depts: ["SNS마케팅과", "글로벌비즈니스과"] }
+    ],
+    "공주시": [
+        { name: "공주마이스터고등학교", address: "충남 공주시 유구읍 백교리 133", depts: ["전기전자과"] },
+        { name: "공주생명과학고등학교", address: "충청남도 공주시 신관동 금벽로 317", depts: ["치유농업과", "축산자원개발과", "산업기계설비과", "식품가공과"] },
+        { name: "공주정보고등학교", address: "충청남도 공주시 마근동길 29", depts: ["보건간호과", "소방안전과", "경영정보과"] }
+    ],
+    "금산군": [
+        { name: "금산산업고등학교", address: "충청남도 금산군 금산읍 진악로 1003", depts: ["그린바이오과", "바이오스마트테크과", "바이오스마트경영과"] },
+        { name: "금산하이텍고등학교", address: "충청남도 금산군 진산면 대둔산로 412", depts: ["스마트기계과", "전기시스템제어과", "식품제조공정과"] }
+    ],
+    "당진시": [
+        { name: "당진정보고등학교", address: "충청남도 당진시 운학길 5", depts: ["AI콘텐츠과", "AI융합경영과", "회계사무과", "유통물류과"] },
+        { name: "합덕제철고등학교", address: "충남 당진시 합덕읍 소소리 면천로 1601", depts: ["철강로봇융합과", "철강기계과", "철강자동화과"] }
+    ],
+    "보령시": [
+        { name: "대천여자상업고등학교", address: "충청남도 보령시 여상길 60", depts: ["경영사무과", "콘텐츠마케팅과", "세무에셋과", "금융회계과", "유통판매과"] },
+        { name: "주산산업고등학교", address: "충남 보령시 주산면 금암리 506", depts: ["건설시스템과", "식품제조과", "자동차기계과", "조경과"] },
+        { name: "충남해양과학고등학교", address: "충청남도 보령시 대천항로 212", depts: ["냉동공조과", "동력제어시스템과", "자영수산과", "해양산업운항과"] }
+    ],
+    "천안시": [
+        { name: "병천고등학교", address: "충남 천안시 동남구 병천면 탑원리", depts: ["미용과", "조리과"] },
+        { name: "천안공업고등학교", address: "충청남도 천안시 동남구 성황5길 17", depts: ["도시공간건설과", "건축디자인과", "기계과", "전기과", "화학공업과", "메카트로닉스과"] },
+        { name: "천안상업고등학교", address: "충청남도 천안시 서북구 상고1길 43-9", depts: ["스마트경영과", "사무회계과", "소프트웨어개발과", "광고미디어디자인과"] },
+        { name: "천안여자상업고등학교", address: "충청남도 천안시 동남구 봉명동 천안여상로 44", depts: ["재무플랫폼과", "비즈니스플랫폼과", "유통플랫폼과", "금융정보과", "비즈니스정보과", "국제통상과"] },
+        { name: "천안제일고등학교", address: "충남 천안시 동남구 원성동 버들로 71", depts: ["반려동물과", "스마트팜과", "바이오식품과"] },
+        { name: "충남관광보건고등학교", address: "충청남도 천안시 서북구 성환읍 신방로 354", depts: ["관광경영과", "보건간호과"] }
+    ],
+    "부여군": [
+        { name: "부여전자고등학교", address: "충남 부여군 임천면 만사리 199", depts: ["전기과", "전자과"] },
+        { name: "부여정보고등학교", address: "충청남도 부여군 규암면 충절로2316번길 24", depts: ["경영사무과", "금융회계과"] },
+        { name: "한국식품마이스터고등학교", address: "충청남도 부여군 홍산면 홍산로 112-23", depts: ["식품제조공정과", "식품품질관리과"] }
+    ],
+    "예산군": [
+        { name: "삽교고등학교", address: "충청남도 예산군 삽교읍 삽교로 161", depts: ["사무행정과"] },
+        { name: "예산예화여자고등학교", address: "충청남도 예산군 예산읍 예산로 117", depts: ["e-비즈니스과", "디지털영상과", "외식조리과", "글로벌외식조리과", "미디어콘텐츠과"] },
+        { name: "충남반도체마이스터고등학교", address: "충남 예산군 예산읍 관작리 315", depts: ["반도체융합과", "정보통신과", "전기제어과", "디지털전자과"] }
+    ],
+    "서산시": [
+        { name: "서산공업고등학교", address: "충청남도 서산시 운산면 운암로 1072-12", depts: ["공정수송기술과", "자동차과", "화학공업과", "정밀기계과"] },
+        { name: "서산중앙고등학교", address: "충청남도 서산시 동문동 벌말1길 23", depts: ["산업설비기계과", "식품가공과", "생태경관디자인과"] }
+    ],
+    "아산시": [
+        { name: "아산스마트팩토리마이스터고등학교", address: "충청남도 아산시 둔포면 둔포중앙로 133번길 42", depts: ["스마트팩토리과"] },
+        { name: "한올고등학교", address: "충청남도 아산시 청운로 158", depts: ["국제통상외국어과"] }
+    ],
+    "서천군": [
+        { name: "장항공업고등학교", address: "충청남도 서천군 장항읍 신창서로 77", depts: ["IOT기계과", "신재생에너지과"] },
+        { name: "한국미래문화고등학교", address: "충청남도 서천군 서천읍 화금서길 45", depts: ["뷰티디자인과", "e-shop경영과", "융합미디어과"] }
+    ],
+    "청양군": [
+        { name: "청양고등학교", address: "충청남도 청양군 청양읍 문화예술로 149", depts: ["바이오식품과", "비즈니스과"] }
+    ],
+    "홍성군": [
+        { name: "충남드론항공고등학교", address: "충청남도 홍성군 광천읍 홍남로 695", depts: ["드론테크과", "드론비즈과"] },
+        { name: "한국 K-POP고등학교", address: "충청남도 홍성군 광천읍 광천로373번길 14", depts: ["K-POP공연예술과"] },
+        { name: "홍성공업고등학교", address: "충청남도 홍성군 결성면 구성남로 55", depts: ["기계과", "전기과"] }
+    ],
+    "태안군": [
+        { name: "태안여자고등학교", address: "충청남도 태안군 태안읍 원이로 7-1", depts: ["미디어콘텐츠과"] }
+    ]
+};
+
+var board=new Array(16).fill(null);
+var marked=new Array(16).fill(false);
+var callOrder=[],callIdx=0;
+var LINES=[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15],[0,5,10,15],[3,6,9,12]];
+
+function goTab(n){
+  ['ph0','ph1','ph2','ph3','ph4'].forEach(function(id,i){
+    var el = document.getElementById(id);
+    if(el) el.classList.toggle('show',i===n);
+  });
+  ['t0','t1','t2','t3','t4'].forEach(function(id,i){
+    var el = document.getElementById(id);
+    if(el) el.classList.toggle('on',i===n);
+  });
+  if(n===1){if(board.filter(Boolean).length<16)autoFill();initGame();}
+  if(n===2)buildPicker();
+  if(n===3)buildKeywordPicker();
+  // 5번 탭 클릭 시 지도 관련 추가 처리가 필요하다면 이곳에 작성
+}
+
+// ── 탭 0 ──
+function buildPool0(){
+  var g=document.getElementById('pool0');g.innerHTML='';
+  JOBS.forEach(function(j,i){
+    var el=document.createElement('div');
+    el.className='jc'+(board.indexOf(j)>=0?' on':'');
+    el.innerHTML='<div class="ji">'+j.i+'</div><div class="jn">'+j.n+'</div>';
+    el.onclick=function(){
+      var bi=board.indexOf(j);
+      if(bi>=0){board[bi]=null;el.classList.remove('on');}
+      else if(board.filter(Boolean).length<16){var e=board.indexOf(null);if(e>=0){board[e]=j;el.classList.add('on');}}
+      renderBoard0();
+    };
+    g.appendChild(el);
+  });
+}
+function renderBoard0(){
+  var fc=board.filter(Boolean).length;
+  document.getElementById('st-sel').textContent=fc;
+  document.getElementById('fill-cnt').textContent='— '+fc+'/16 채움';
+  var g=document.getElementById('bgrid0');g.innerHTML='';
+  board.forEach(function(j,i){
+    var c=document.createElement('div');
+    if(!j){c.className='bc empty';c.innerHTML='<div class="bi">+</div>';}
+    else{
+      c.className='bc filled';
+      c.innerHTML='<div class="bi">'+j.i+'</div><div class="bn">'+j.n+'</div>';
+      c.onclick=function(){board[i]=null;buildPool0();renderBoard0();};
+    }
+    g.appendChild(c);
+  });
+  document.querySelectorAll('#pool0 .jc').forEach(function(el,i){el.classList.toggle('on',board.indexOf(JOBS[i])>=0);});
+}
+function autoFill(){
+  board=new Array(16).fill(null);
+  var arr=JOBS.slice().sort(function(){return Math.random()-.5;}).slice(0,16);
+  arr.forEach(function(j,i){board[i]=j;});
+  buildPool0();renderBoard0();
+}
+function clearBoard(){board=new Array(16).fill(null);buildPool0();renderBoard0();}
+
+// ── 탭 1 ──
+function initGame(){
+  callOrder=JOBS.map(function(_,i){return i;}).sort(function(){return Math.random()-.5;});
+  callIdx=0;
+  marked=new Array(16).fill(false);
+  document.getElementById('call-btn').disabled=false;
+  document.getElementById('cl-job').textContent='▶ 버튼을 눌러 시작!';
+  document.getElementById('cl-prog').textContent='0 / 25 호명';
+  document.getElementById('bingo-res').className='bingo-res';
+  document.getElementById('st-bingo').textContent='0';
+  buildPlayBoard();
+  document.querySelectorAll('#pool0 .jc').forEach(function(el){el.classList.remove('called');});
+}
+function buildPlayBoard(){
+  var g=document.getElementById('bgrid1');g.innerHTML='';
+  board.forEach(function(j,i){
+    var c=document.createElement('div');
+    c.className='bc'+(j?' filled':'empty');
+    if(j){
+      c.innerHTML='<div class="bi">'+j.i+'</div><div class="bn">'+j.n+'</div>';
+      c.onclick=(function(idx,el,job){return function(){
+        var called=callOrder.slice(0,callIdx).map(function(ci){return JOBS[ci].n;});
+        if(called.indexOf(job.n)<0){el.style.animation='shake .3s';setTimeout(function(){el.style.animation='';},300);return;}
+        marked[idx]=!marked[idx];
+        el.classList.toggle('mk',marked[idx]);
+        if(!marked[idx])el.classList.remove('bl');
+        checkBingo();
+      };})(i,c,j);
+    }
+    g.appendChild(c);
+  });
+}
+function callNext(){
+  if(callIdx>=JOBS.length){document.getElementById('call-btn').disabled=true;document.getElementById('cl-job').textContent='모든 직업을 불렀어요!';return;}
+  var ji=callOrder[callIdx++];
+  var j=JOBS[ji];
+  document.getElementById('cl-job').textContent=j.i+' '+j.n;
+  document.getElementById('cl-prog').textContent=callIdx+' / 25 호명';
+}
+function checkBingo(){
+  var cells=document.querySelectorAll('#bgrid1 .bc');
+  var cnt=0;
+  LINES.forEach(function(L){if(L.every(function(x){return marked[x];})){cnt++;L.forEach(function(x){cells[x].classList.add('bl');});}});
+  document.getElementById('st-bingo').textContent=cnt;
+  var r=document.getElementById('bingo-res');
+  if(cnt>=3){r.className='bingo-res show r3';r.textContent='🎉 빙고 '+cnt+'개! 직업계고의 세계를 넓게 알고 있군요!';}
+  else if(cnt===2){r.className='bingo-res show r2';r.textContent='✨ 빙고 '+cnt+'개! 관심 분야가 점점 뚜렷해지네요!';}
+  else if(cnt===1){r.className='bingo-res show r1';r.textContent='🌱 첫 빙고! 내가 관심 있는 직업이 보이기 시작했어요!';}
+}
+
+// ── 탭 2 ──
+function buildPicker(){
+  var g=document.getElementById('job-picker');g.innerHTML='';
+  JOBS.forEach(function(j,i){
+    var el=document.createElement('div');
+    el.className='jp';
+    el.innerHTML='<div class="jp-i">'+j.i+'</div><div class="jp-n">'+j.n+'</div>';
+    el.onclick=function(){
+      document.querySelectorAll('.jp').forEach(function(x){x.classList.remove('on');});
+      el.classList.add('on');
+      showSchools(j.n);
+    };
+    g.appendChild(el);
+  });
+  document.getElementById('res-list').innerHTML='<div class="res-empty">위에서 관심 있는 직업을 눌러보세요!</div>';
+  document.getElementById('res-count').textContent='';
+}
+function showSchools(jobName){
+  var data=SCHOOL_DATA[jobName];
+  var cnt=document.getElementById('res-count');
+  var list=document.getElementById('res-list');
+  if(!data||data.length===0){list.innerHTML='<div class="res-empty">관련 학교 정보가 없어요.</div>';cnt.textContent='';return;}
+  cnt.textContent='총 '+data.length+'개 학교·학과 매칭됨';
+  list.innerHTML=data.map(function(r){
+    return '<div class="sc-card"><div class="sc-head"><div class="sc-nm">🏫 '+r.school+'</div><span class="sc-reg">'+r.region+'</span></div><div class="sc-dept">'+r.dept+'</div><div class="sc-desc">'+r.desc+'</div><div class="sc-addr">📍 '+r.addr+'</div></div>';
+  }).join('');
+}
+
+// ── 탭 3: 주제어로 찾기 ──
+function buildKeywordPicker() {
+  var g = document.getElementById('keyword-pool'); if(!g) return;
+  g.innerHTML = '';
+  var keys = Object.keys(KEYWORD_MAPPING).sort();
+  keys.forEach(function(k) {
+    var el = document.createElement('button');
+    el.className = 'kw-btn';
+    el.textContent = '#' + k;
+    el.onclick = function() {
+      document.querySelectorAll('.kw-btn').forEach(function(x){x.classList.remove('on');});
+      el.classList.add('on');
+      showKeywordSchools(k);
+    };
+    g.appendChild(el);
+  });
+  document.getElementById('res-list-k').innerHTML = '<div class="res-empty">상단의 추천 주제어 태그를 클릭하여 매칭되는 학교를 탐색해보세요!</div>';
+  document.getElementById('res-count-k').textContent = '';
+}
+
+function showKeywordSchools(kw) {
+  var depts = KEYWORD_MAPPING[kw] || [];
+  var cnt = document.getElementById('res-count-k');
+  var list = document.getElementById('res-list-k');
+  if(!cnt || !list) return;
+  
+  var matchedResults = [];
+  
+  Object.keys(SCHOOL_DATA).forEach(function(jobKey) {
+    SCHOOL_DATA[jobKey].forEach(function(record) {
+      if(depts.indexOf(record.dept) >= 0 || depts.some(function(d){ return record.dept.indexOf(d) >= 0; })) {
+        var isDup = matchedResults.some(function(r){ return r.school === record.school && r.dept === record.dept; });
+        if(!isDup) {
+          matchedResults.push(record);
+        }
+      }
+    });
+  });
+  
+  if(matchedResults.length === 0) {
+    list.innerHTML = '<div class="res-empty">해당 관심사 주제어와 연결된 학과가 아직 개설되지 않았습니다.</div>';
+    cnt.textContent = '';
+    return;
+  }
+  
+  cnt.textContent = '총 ' + matchedResults.length + '개 학교·학과 융합 매칭됨 (선택한 주제어: #' + kw + ')';
+  list.innerHTML = matchedResults.map(function(r){
+    return '<div class="sc-card"><div class="sc-head"><div class="sc-nm">🏫 '+r.school+'</div><span class="sc-reg">'+r.region+'</span></div><div class="sc-dept">'+r.dept+'</div><div class="sc-desc">'+r.desc+'</div><div class="sc-addr">📍 '+r.addr+'</div></div>';
+  }).join('');
+}
+
+// ── 탭 5: D3.js 지도 렌더링 로직 ──
+const chungnamNames = Object.keys(mapDatabase);
+const width = 600;
+const height = 550;
+
+const svg = d3.select("#map-display")
+    .append("svg")
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("width", "100%")
+    .attr("height", "100%");
+
+const gMap = svg.append("g").attr("id", "map-paths");
+const gLabels = svg.append("g").attr("id", "map-labels");
+const geoUrl = "https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_municipalities_geo_simple.json";
+
+d3.json(geoUrl).then(function(data) {
+    document.getElementById('loading-text').style.display = 'none';
+
+    const getRegionName = (fullName) => chungnamNames.find(name => fullName.includes(name));
+    const chungnamFeatures = data.features.filter(d => getRegionName(d.properties.name));
+
+    const projection = d3.geoMercator().fitSize([width, height], { type: "FeatureCollection", features: chungnamFeatures });
+    const path = d3.geoPath().projection(projection);
+
+    gMap.selectAll("path")
+        .data(chungnamFeatures)
+        .enter().append("path")
+        .attr("class", "region-poly")
+        .attr("data-region", d => getRegionName(d.properties.name))
+        .attr("d", path)
+        .on("click", function(event, d) {
+            const regionName = getRegionName(d.properties.name);
+            d3.selectAll(".region-poly").classed("active", false);
+            d3.selectAll(".region-label").classed("active-label", false);
+            
+            d3.selectAll(`.region-poly[data-region='${regionName}']`).classed("active", true).raise();
+            d3.select(`.region-label[data-region='${regionName}']`).classed("active-label", true);
+
+            showMapRegionData(regionName);
+        });
+
+    const addedLabels = new Set();
+    const labelData = [];
+    
+    chungnamFeatures.forEach(d => {
+        const rName = getRegionName(d.properties.name);
+        if (!addedLabels.has(rName)) {
+            addedLabels.add(rName);
+            const centroid = path.centroid(d);
+            labelData.push({ name: rName, x: centroid[0], y: centroid[1] });
+        }
+    });
+
+    labelData.forEach(d => {
+        if (d.name === "천안시") { d.x += 15; d.y += 40; }
+    });
+
+    gLabels.selectAll("text")
+        .data(labelData)
+        .enter().append("text")
+        .attr("class", "region-label")
+        .attr("data-region", d => d.name)
+        .attr("x", d => d.x)
+        .attr("y", d => d.y)
+        .text(d => d.name);
+        
+}).catch(error => {
+    document.getElementById('loading-text').innerHTML = "⚠️ <b>지도 데이터를 불러오지 못했습니다.</b><br>인터넷 연결 상태를 확인해주세요.";
+});
+
+function showMapRegionData(regionName) {
+    const listContainer = document.getElementById('map-list-container');
+    const schools = mapDatabase[regionName];
+
+    if (schools && schools.length > 0) {
+        let html = `<div class="res-count">📍 ${regionName} 직업계고 현황 (총 ${schools.length}교)</div>`;
+        html += `<div class="res-list">`;
+        schools.forEach(school => {
+            let tagsHtml = school.depts.map(dept => `<span class="sc-reg" style="margin-right:4px; margin-bottom:4px; display:inline-block;">${dept}</span>`).join('');
+            html += `
+                <div class="sc-card">
+                    <div class="sc-head">
+                        <div class="sc-nm">🏫 ${school.name}</div>
+                    </div>
+                    <div class="sc-dept" style="margin-bottom:8px;">${tagsHtml}</div>
+                    <div class="sc-addr">📍 ${school.address}</div>
+                </div>
+            `;
+        });
+        html += `</div>`;
+        listContainer.innerHTML = html;
+    } else {
+        listContainer.innerHTML = `
+            <div class="res-count">📍 ${regionName}</div>
+            <div class="res-empty">해당 지역에 등록된 직업계고등학교가 없습니다.</div>
+        `;
+    }
+}
+
+// 초기화 구동
+buildPool0();renderBoard0();
+</script>
+</body>
+</html>
